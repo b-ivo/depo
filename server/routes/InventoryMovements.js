@@ -5,64 +5,119 @@ import Beer from "../models/Beer.js";
 
 const router = express.Router();
 
-router.post("/", async (req, res) => {
+/*
+  GET ALL INVENTORY MOVEMENTS
+*/
+router.get("/", async (req, res) => {
   try {
-    const { beer, quantity, date } = req.body;
-
-    if (!beer || quantity === undefined || !date) {
-      return res.status(400).json({
-        success: false,
-        message: "Beer, quantity, and date are required.",
+    const movements = await InventoryMovement.find()
+      .populate("beer", "name price")
+      .sort({
+        date: -1,
+        createdAt: -1,
       });
-    }
 
-    if (!mongoose.Types.ObjectId.isValid(beer)) {
-      return res.status(400).json({
-        success: false,
-        message: "Invalid beer ID.",
-      });
-    }
-
-    if (
-      typeof quantity !== "number" ||
-      !Number.isInteger(quantity) ||
-      quantity < 0
-    ) {
-      return res.status(400).json({
-        success: false,
-        message: "Quantity must be a non-negative whole number.",
-      });
-    }
-
-    const selectedBeer = await Beer.findOne({
-      _id: beer,
-      active: true,
-    });
-
-    if (!selectedBeer) {
-      return res.status(404).json({
-        success: false,
-        message: "Beer not found or inactive.",
-      });
-    }
-
-    const movement = await InventoryMovement.create({
-      beer,
-      type: "fulfillment",
-      quantity,
-      date: new Date(date),
-    });
-
-    res.status(201).json({
+    res.json({
       success: true,
-      data: movement,
+      count: movements.length,
+      data: movements,
     });
   } catch (error) {
     console.error(error);
 
     res.status(500).json({
       success: false,
-      message: "Failed to record fulfillment.",
+      message: "Failed to retrieve inventory movements.",
+    });
+  }
+});
+
+/*
+  GET MOVEMENTS FOR ONE BEER
+*/
+router.get("/beer/:beerId", async (req, res) => {
+  try {
+    const { beerId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(beerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid beer ID.",
+      });
+    }
+
+    const beer = await Beer.findById(beerId);
+
+    if (!beer) {
+      return res.status(404).json({
+        success: false,
+        message: "Beer not found.",
+      });
+    }
+
+    const movements = await InventoryMovement.find({
+      beer: beerId,
+    }).sort({
+      date: -1,
+      createdAt: -1,
+    });
+
+    res.json({
+      success: true,
+      count: movements.length,
+      data: movements,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve beer movements.",
+    });
+  }
+});
+
+/*
+  GET MOVEMENTS FOR ONE DAY
+*/
+router.get("/day/:date", async (req, res) => {
+  try {
+    const { date } = req.params;
+
+    const startDate = new Date(`${date}T00:00:00.000Z`);
+
+    if (Number.isNaN(startDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid date.",
+      });
+    }
+
+    const endDate = new Date(startDate);
+    endDate.setUTCDate(endDate.getUTCDate() + 1);
+
+    const movements = await InventoryMovement.find({
+      date: {
+        $gte: startDate,
+        $lt: endDate,
+      },
+    })
+      .populate("beer", "name price")
+      .sort({
+        createdAt: 1,
+      });
+
+    res.json({
+      success: true,
+      count: movements.length,
+      data: movements,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve daily inventory movements.",
     });
   }
 });

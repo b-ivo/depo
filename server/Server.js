@@ -16,9 +16,9 @@ connectDB();
 
 app.use(express.json());
 app.use("/api/beers", beersRouter);
+app.use("/api/days", daysRouter);
 app.use("/api/inventory-movements", inventoryMovementsRouter);
 app.use("/api/initial-stock", initialStockRouter);
-app.use("/api/days", daysRouter);
 
 app.listen(PORT, () => {
   console.log(`Mini DEPO API running on port ${PORT}`);

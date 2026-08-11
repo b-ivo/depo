@@ -6,7 +6,11 @@ import Beer from "../models/Beer.js";
 
 const router = express.Router();
 
-// Start a new business day
+/*
+  START BUSINESS DAY
+  Previous day's evening stock becomes today's morning stock.
+  Fulfillment is optional.
+*/
 router.post("/start", async (req, res) => {
   try {
     const today = new Date();
@@ -37,7 +41,7 @@ router.post("/start", async (req, res) => {
       });
     }
 
-    // The previous day must be closed.
+    // Previous day must be closed first.
     if (!previousDay.closed) {
       return res.status(400).json({
         success: false,
@@ -46,7 +50,7 @@ router.post("/start", async (req, res) => {
       });
     }
 
-    // Yesterday's evening stock becomes today's morning stock.
+    // Previous evening stock becomes today's morning stock.
     const stock = previousDay.stock.map((item) => ({
       beer: item.beer,
       name: item.name,
@@ -93,7 +97,42 @@ router.post("/start", async (req, res) => {
   }
 });
 
-// Record fulfillment for the current open business day
+/*
+  GET CURRENT OPEN BUSINESS DAY
+*/
+router.get("/current", async (req, res) => {
+  try {
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({
+      date: -1,
+    });
+
+    if (!currentDay) {
+      return res.status(404).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve current business day.",
+    });
+  }
+});
+
+/*
+  RECORD FULFILLMENT
+  Fulfillment is optional.
+*/
 router.post("/fulfillment", async (req, res) => {
   try {
     const { beer, quantity } = req.body;
@@ -125,7 +164,9 @@ router.post("/fulfillment", async (req, res) => {
 
     const currentDay = await DailyRecord.findOne({
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -157,7 +198,7 @@ router.post("/fulfillment", async (req, res) => {
       });
     }
 
-    // Zero fulfillment is valid, but there is nothing to record.
+    // Zero fulfillment is valid but there is nothing to record.
     if (quantity === 0) {
       return res.json({
         success: true,
@@ -195,6 +236,10 @@ router.post("/fulfillment", async (req, res) => {
   }
 });
 
+/*
+  RECORD EVENING STOCK
+  Calculates sold quantity and expected sales.
+*/
 router.patch("/evening-stock", async (req, res) => {
   try {
     const { stock } = req.body;
@@ -208,7 +253,9 @@ router.patch("/evening-stock", async (req, res) => {
 
     const currentDay = await DailyRecord.findOne({
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -280,6 +327,12 @@ router.patch("/evening-stock", async (req, res) => {
     currentDay.totals.sold = totalSold;
     currentDay.totals.expectedSales = totalExpectedSales;
 
+    // If Mobile Money was already recorded, recalculate expected cash.
+    if (currentDay.payments.mobileMoney !== null) {
+      currentDay.totals.expectedCash =
+        totalExpectedSales - currentDay.payments.mobileMoney;
+    }
+
     await currentDay.save();
 
     res.json({
@@ -297,6 +350,10 @@ router.patch("/evening-stock", async (req, res) => {
   }
 });
 
+/*
+  RECORD MOBILE MONEY
+  Mobile Money is optional.
+*/
 router.patch("/mobile-money", async (req, res) => {
   try {
     const { mobileMoney } = req.body;
@@ -321,7 +378,9 @@ router.patch("/mobile-money", async (req, res) => {
 
     const currentDay = await DailyRecord.findOne({
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -366,6 +425,10 @@ router.patch("/mobile-money", async (req, res) => {
   }
 });
 
+/*
+  RECORD ACTUAL CASH
+  Mobile Money is optional.
+*/
 router.patch("/actual-cash", async (req, res) => {
   try {
     const { actualCash } = req.body;
@@ -390,7 +453,9 @@ router.patch("/actual-cash", async (req, res) => {
 
     const currentDay = await DailyRecord.findOne({
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -399,11 +464,19 @@ router.patch("/actual-cash", async (req, res) => {
       });
     }
 
-    if (currentDay.totals.expectedCash === null) {
+    if (currentDay.totals.expectedSales === null) {
       return res.status(400).json({
         success: false,
-        message: "Mobile Money must be recorded before actual cash.",
+        message: "Evening stock must be recorded before actual cash.",
       });
+    }
+
+    // Mobile Money is optional.
+    // If none was recorded, treat it as zero.
+    if (currentDay.payments.mobileMoney === null) {
+      currentDay.payments.mobileMoney = 0;
+
+      currentDay.totals.expectedCash = currentDay.totals.expectedSales;
     }
 
     const difference = actualCash - currentDay.totals.expectedCash;
@@ -439,11 +512,16 @@ router.patch("/actual-cash", async (req, res) => {
   }
 });
 
+/*
+  CLOSE BUSINESS DAY
+*/
 router.post("/close", async (req, res) => {
   try {
     const currentDay = await DailyRecord.findOne({
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -461,9 +539,10 @@ router.post("/close", async (req, res) => {
     }
 
     // Mobile Money is optional.
-    // If none was recorded, treat it as 0.
+    // If none was recorded, treat it as zero.
     if (currentDay.payments.mobileMoney === null) {
       currentDay.payments.mobileMoney = 0;
+
       currentDay.totals.expectedCash = currentDay.totals.expectedSales;
     }
 
@@ -511,6 +590,10 @@ router.post("/close", async (req, res) => {
   }
 });
 
+/*
+  GET DAILY HISTORY
+  Only closed days appear in history.
+*/
 router.get("/", async (req, res) => {
   try {
     const days = await DailyRecord.find({
@@ -534,6 +617,62 @@ router.get("/", async (req, res) => {
   }
 });
 
+router.get("/history/range", async (req, res) => {
+  try {
+    const { from, to } = req.query;
+
+    if (!from || !to) {
+      return res.status(400).json({
+        success: false,
+        message: "Both from and to dates are required.",
+      });
+    }
+
+    const startDate = new Date(`${from}T00:00:00.000Z`);
+    const endDate = new Date(`${to}T23:59:59.999Z`);
+
+    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid date range.",
+      });
+    }
+
+    if (startDate > endDate) {
+      return res.status(400).json({
+        success: false,
+        message: "The from date cannot be after the to date.",
+      });
+    }
+
+    const days = await DailyRecord.find({
+      closed: true,
+      date: {
+        $gte: startDate,
+        $lte: endDate,
+      },
+    }).sort({
+      date: -1,
+    });
+
+    res.json({
+      success: true,
+      count: days.length,
+      data: days,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve history.",
+    });
+  }
+});
+
+/*
+  GET ONE DAILY RECORD
+*/
 router.get("/:id", async (req, res) => {
   try {
     const { id } = req.params;
