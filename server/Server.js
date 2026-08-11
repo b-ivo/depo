@@ -2,6 +2,10 @@ import "dotenv/config";
 import { setServers } from "node:dns/promises";
 import express from "express";
 import connectDB from "./config/db.js";
+import beersRouter from "./routes/Beers.js";
+import inventoryMovementsRouter from "./routes/InventoryMovements.js";
+import initialStockRouter from "./routes/InitialStock.js";
+import daysRouter from "./routes/days.js";
 
 setServers(["8.8.8.8", "1.1.1.1"]);
 
@@ -11,13 +15,10 @@ const PORT = 5000;
 connectDB();
 
 app.use(express.json());
-
-app.get("/api/health", (req, res) => {
-  res.json({
-    success: true,
-    message: "Mini DEPO API is running",
-  });
-});
+app.use("/api/beers", beersRouter);
+app.use("/api/inventory-movements", inventoryMovementsRouter);
+app.use("/api/initial-stock", initialStockRouter);
+app.use("/api/days", daysRouter);
 
 app.listen(PORT, () => {
   console.log(`Mini DEPO API running on port ${PORT}`);
