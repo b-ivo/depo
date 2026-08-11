@@ -108,16 +108,33 @@ router.get("/current", async (req, res) => {
       date: -1,
     });
 
-    if (!currentDay) {
-      return res.status(404).json({
-        success: false,
-        message: "There is no open business day.",
+    if (currentDay) {
+      return res.json({
+        success: true,
+        data: currentDay,
       });
     }
 
-    res.json({
-      success: true,
-      data: currentDay,
+    // Check whether today's business day already exists.
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const todayDay = await DailyRecord.findOne({
+      date: today,
+    });
+
+    if (todayDay && todayDay.closed) {
+      return res.status(409).json({
+        success: false,
+        code: "DAY_ALREADY_CLOSED",
+        message: "Today's business day has already been closed.",
+      });
+    }
+
+    return res.status(404).json({
+      success: false,
+      code: "NO_OPEN_DAY",
+      message: "Today's business day has not been started yet.",
     });
   } catch (error) {
     console.error(error);

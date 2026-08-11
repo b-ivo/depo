@@ -1,4 +1,5 @@
 import "dotenv/config";
+import cors from "cors";
 import { setServers } from "node:dns/promises";
 import express from "express";
 import connectDB from "./config/db.js";
@@ -11,6 +12,12 @@ setServers(["8.8.8.8", "1.1.1.1"]);
 
 const app = express();
 const PORT = 5000;
+
+app.use(
+  cors({
+    origin: "http://localhost:5173",
+  }),
+);
 
 connectDB();
 
