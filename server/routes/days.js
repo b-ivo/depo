@@ -12,6 +12,7 @@ router.post("/start", async (req, res) => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
+    // Prevent starting the same business day twice.
     const existingDay = await DailyRecord.findOne({
       date: today,
     });
@@ -23,9 +24,10 @@ router.post("/start", async (req, res) => {
       });
     }
 
-    const previousDay = await DailyRecord.findOne({
-      date: { $lt: today },
-    }).sort({ date: -1 });
+    // Find the most recent business day.
+    const previousDay = await DailyRecord.findOne().sort({
+      date: -1,
+    });
 
     if (!previousDay) {
       return res.status(400).json({
@@ -35,6 +37,7 @@ router.post("/start", async (req, res) => {
       });
     }
 
+    // The previous day must be closed.
     if (!previousDay.closed) {
       return res.status(400).json({
         success: false,
@@ -43,17 +46,35 @@ router.post("/start", async (req, res) => {
       });
     }
 
+    // Yesterday's evening stock becomes today's morning stock.
     const stock = previousDay.stock.map((item) => ({
       beer: item.beer,
       name: item.name,
       price: item.price,
       morning: item.evening,
       fulfilled: 0,
+      evening: null,
+      sold: null,
+      expected: null,
     }));
 
     const dailyRecord = await DailyRecord.create({
       date: today,
       stock,
+
+      totals: {
+        sold: null,
+        expectedSales: null,
+        expectedCash: null,
+      },
+
+      payments: {
+        mobileMoney: null,
+        actualCash: null,
+      },
+
+      difference: null,
+      status: null,
       closed: false,
     });
 
@@ -272,6 +293,277 @@ router.patch("/evening-stock", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to record evening stock.",
+    });
+  }
+});
+
+router.patch("/mobile-money", async (req, res) => {
+  try {
+    const { mobileMoney } = req.body;
+
+    if (mobileMoney === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Money amount is required.",
+      });
+    }
+
+    if (
+      typeof mobileMoney !== "number" ||
+      !Number.isFinite(mobileMoney) ||
+      mobileMoney < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Money must be a valid non-negative amount.",
+      });
+    }
+
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({ date: -1 });
+
+    if (!currentDay) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    if (currentDay.totals.expectedSales === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Evening stock must be recorded before Mobile Money.",
+      });
+    }
+
+    if (mobileMoney > currentDay.totals.expectedSales) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Money cannot be greater than total expected sales.",
+      });
+    }
+
+    const expectedCash = currentDay.totals.expectedSales - mobileMoney;
+
+    currentDay.payments.mobileMoney = mobileMoney;
+    currentDay.totals.expectedCash = expectedCash;
+
+    await currentDay.save();
+
+    res.json({
+      success: true,
+      message: "Mobile Money recorded successfully.",
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to record Mobile Money.",
+    });
+  }
+});
+
+router.patch("/actual-cash", async (req, res) => {
+  try {
+    const { actualCash } = req.body;
+
+    if (actualCash === undefined) {
+      return res.status(400).json({
+        success: false,
+        message: "Actual cash amount is required.",
+      });
+    }
+
+    if (
+      typeof actualCash !== "number" ||
+      !Number.isFinite(actualCash) ||
+      actualCash < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Actual cash must be a valid non-negative amount.",
+      });
+    }
+
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({ date: -1 });
+
+    if (!currentDay) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    if (currentDay.totals.expectedCash === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Mobile Money must be recorded before actual cash.",
+      });
+    }
+
+    const difference = actualCash - currentDay.totals.expectedCash;
+
+    let status;
+
+    if (difference === 0) {
+      status = "balanced";
+    } else if (difference < 0) {
+      status = "shortage";
+    } else {
+      status = "surplus";
+    }
+
+    currentDay.payments.actualCash = actualCash;
+    currentDay.difference = difference;
+    currentDay.status = status;
+
+    await currentDay.save();
+
+    res.json({
+      success: true,
+      message: "Actual cash recorded successfully.",
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to record actual cash.",
+    });
+  }
+});
+
+router.post("/close", async (req, res) => {
+  try {
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({ date: -1 });
+
+    if (!currentDay) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    // Evening stock must be completed.
+    if (currentDay.totals.expectedSales === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Evening stock must be recorded before closing the day.",
+      });
+    }
+
+    // Mobile Money is optional.
+    // If none was recorded, treat it as 0.
+    if (currentDay.payments.mobileMoney === null) {
+      currentDay.payments.mobileMoney = 0;
+      currentDay.totals.expectedCash = currentDay.totals.expectedSales;
+    }
+
+    // Actual cash is required.
+    if (currentDay.payments.actualCash === null) {
+      return res.status(400).json({
+        success: false,
+        message: "Actual cash must be recorded before closing the day.",
+      });
+    }
+
+    const expectedCash = currentDay.totals.expectedCash;
+    const actualCash = currentDay.payments.actualCash;
+
+    const difference = actualCash - expectedCash;
+
+    let status;
+
+    if (difference === 0) {
+      status = "balanced";
+    } else if (difference < 0) {
+      status = "shortage";
+    } else {
+      status = "surplus";
+    }
+
+    currentDay.difference = difference;
+    currentDay.status = status;
+    currentDay.closed = true;
+
+    await currentDay.save();
+
+    res.json({
+      success: true,
+      message: "Business day closed successfully.",
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to close business day.",
+    });
+  }
+});
+
+router.get("/", async (req, res) => {
+  try {
+    const days = await DailyRecord.find({
+      closed: true,
+    }).sort({
+      date: -1,
+    });
+
+    res.json({
+      success: true,
+      count: days.length,
+      data: days,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve daily history.",
+    });
+  }
+});
+
+router.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid daily record ID.",
+      });
+    }
+
+    const day = await DailyRecord.findById(id);
+
+    if (!day) {
+      return res.status(404).json({
+        success: false,
+        message: "Daily record not found.",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: day,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to retrieve daily record.",
     });
   }
 });
