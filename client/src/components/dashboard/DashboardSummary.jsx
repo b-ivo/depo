@@ -1,47 +1,68 @@
 import { formatCurrency } from "../../utils/formatCurrency";
+import StatCard from "./StatCard";
 
 function DashboardSummary({ day }) {
   const cards = [
     {
-      label: "Total Sold",
+      title: "Total Sold",
       value: day?.totals?.sold ?? 0,
+      description: "Crates sold today",
     },
     {
-      label: "Expected Sales",
+      title: "Expected Sales",
       value: formatCurrency(day?.totals?.expectedSales),
+      description: "Total value of sales",
     },
     {
-      label: "Expected Cash",
+      title: "Expected Cash",
       value: formatCurrency(day?.totals?.expectedCash),
+      description: "Cash expected after Mobile Money",
     },
     {
-      label: "Mobile Money",
-      value: formatCurrency(day?.payments?.mobileMoney ?? 0),
+      title: "Mobile Money",
+      value: formatCurrency(day?.payments?.mobileMoney),
+      description: "Mobile Money received",
     },
     {
-      label: "Actual Cash",
+      title: "Actual Cash",
       value: formatCurrency(day?.payments?.actualCash),
+      description: "Cash counted",
     },
     {
-      label: "Difference",
+      title: "Difference",
       value: formatCurrency(day?.difference),
+      description: getDifferenceDescription(day?.status),
     },
   ];
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
       {cards.map((card) => (
-        <div
-          key={card.label}
-          className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm"
-        >
-          <p className="text-sm text-slate-500">{card.label}</p>
-
-          <p className="mt-2 text-2xl font-bold text-slate-900">{card.value}</p>
-        </div>
+        <StatCard
+          key={card.title}
+          title={card.title}
+          value={card.value}
+          description={card.description}
+        />
       ))}
     </div>
   );
+}
+
+function getDifferenceDescription(status) {
+  if (status === "balanced") {
+    return "Cash is balanced";
+  }
+
+  if (status === "shortage") {
+    return "Cash shortage";
+  }
+
+  if (status === "surplus") {
+    return "Cash surplus";
+  }
+
+  return "Not calculated yet";
 }
 
 export default DashboardSummary;

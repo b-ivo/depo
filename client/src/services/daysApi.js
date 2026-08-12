@@ -108,9 +108,7 @@ export async function startBusinessDay() {
 }
 
 export async function getCurrentDay() {
-  const response = await fetch(
-    "http://localhost:5000/api/days/current",
-  );
+  const response = await fetch("http://localhost:5000/api/days/current");
 
   const data = await response.json();
 

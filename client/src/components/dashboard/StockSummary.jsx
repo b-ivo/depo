@@ -67,7 +67,7 @@ function StockSummary({ stock = [] }) {
             {stock.length === 0 && (
               <tr>
                 <td
-                  colSpan="6"
+                  colSpan={6}
                   className="px-5 py-10 text-center text-slate-500"
                 >
                   No stock recorded for today.
