@@ -17,6 +17,10 @@ const navigation = [
     label: "Beer Management",
     path: "/beers",
   },
+  {
+    label: "Inventory",
+    path: "/inventory",
+  },
 ];
 
 function Sidebar({ open, onClose }) {

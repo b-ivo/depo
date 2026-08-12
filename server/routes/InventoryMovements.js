@@ -32,9 +32,7 @@ router.get("/", async (req, res) => {
   }
 });
 
-/*
-  GET MOVEMENTS FOR ONE BEER
-*/
+// GET MOVEMENTS FOR ONE BEER
 router.get("/beer/:beerId", async (req, res) => {
   try {
     const { beerId } = req.params;
@@ -57,10 +55,12 @@ router.get("/beer/:beerId", async (req, res) => {
 
     const movements = await InventoryMovement.find({
       beer: beerId,
-    }).sort({
-      date: -1,
-      createdAt: -1,
-    });
+    })
+      .populate("beer", "name price")
+      .sort({
+        date: -1,
+        createdAt: -1,
+      });
 
     res.json({
       success: true,
