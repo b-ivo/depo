@@ -6,6 +6,7 @@ import FulfillmentForm from "../components/daily/FulfillmentForm";
 import EveningStockForm from "../components/daily/EveningStockForm";
 import PaymentSection from "../components/daily/PaymentSection";
 import CloseDaySection from "../components/daily/CloseDaySection";
+import AddBeerToDay from "../components/daily/AddBeerToDay";
 
 import { startBusinessDay } from "../services/daysApi";
 import { useCurrentDay } from "../hooks/useCurrentDay";
@@ -184,6 +185,8 @@ function DailyRecord() {
     >
       <div className="space-y-6">
         <StockTable stock={day.stock} />
+
+        <AddBeerToDay stock={day.stock} onSuccess={refresh} />
 
         <FulfillmentForm stock={day.stock} onSuccess={refresh} />
 

@@ -146,6 +146,88 @@ router.get("/current", async (req, res) => {
   }
 });
 
+
+// Add a beer to the current open business day
+router.post("/add-beer", async (req, res) => {
+  try {
+    const { beer } = req.body;
+
+    if (!beer) {
+      return res.status(400).json({
+        success: false,
+        message: "Beer ID is required.",
+      });
+    }
+
+    if (!mongoose.Types.ObjectId.isValid(beer)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid beer ID.",
+      });
+    }
+
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({ date: -1 });
+
+    if (!currentDay) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    const selectedBeer = await Beer.findOne({
+      _id: beer,
+      active: true,
+    });
+
+    if (!selectedBeer) {
+      return res.status(404).json({
+        success: false,
+        message: "Beer not found or inactive.",
+      });
+    }
+
+    const alreadyExists = currentDay.stock.some(
+      (item) => item.beer.toString() === beer,
+    );
+
+    if (alreadyExists) {
+      return res.status(409).json({
+        success: false,
+        message: "This beer is already part of today's stock.",
+      });
+    }
+
+    currentDay.stock.push({
+      beer: selectedBeer._id,
+      name: selectedBeer.name,
+      price: selectedBeer.price,
+      morning: 0,
+      fulfilled: 0,
+      evening: null,
+      sold: null,
+      expected: null,
+    });
+
+    await currentDay.save();
+
+    res.status(201).json({
+      success: true,
+      message: "Beer added to today's stock successfully.",
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to add beer to today's stock.",
+    });
+  }
+});
+
 /*
   RECORD FULFILLMENT
   Fulfillment is optional.
@@ -249,6 +331,81 @@ router.post("/fulfillment", async (req, res) => {
     res.status(500).json({
       success: false,
       message: "Failed to record fulfillment.",
+    });
+  }
+});
+
+// Update the total fulfillment for a beer in the current open business day
+router.patch("/fulfillment/:beerId", async (req, res) => {
+  try {
+    const { beerId } = req.params;
+    const { quantity } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(beerId)) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid beer ID.",
+      });
+    }
+
+    if (
+      typeof quantity !== "number" ||
+      !Number.isInteger(quantity) ||
+      quantity < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Quantity must be a non-negative whole number.",
+      });
+    }
+
+    const currentDay = await DailyRecord.findOne({
+      closed: false,
+    }).sort({ date: -1 });
+
+    if (!currentDay) {
+      return res.status(400).json({
+        success: false,
+        message: "There is no open business day.",
+      });
+    }
+
+    const stockItem = currentDay.stock.find(
+      (item) => item.beer.toString() === beerId,
+    );
+
+    if (!stockItem) {
+      return res.status(404).json({
+        success: false,
+        message: "This beer is not part of today's stock.",
+      });
+    }
+
+    // If evening stock has already been recorded,
+    // changing fulfillment could invalidate the sales calculation.
+    if (stockItem.evening !== null) {
+      return res.status(400).json({
+        success: false,
+        message:
+          "Fulfillment cannot be edited after evening stock has been recorded.",
+      });
+    }
+
+    stockItem.fulfilled = quantity;
+
+    await currentDay.save();
+
+    res.json({
+      success: true,
+      message: "Fulfillment updated successfully.",
+      data: currentDay,
+    });
+  } catch (error) {
+    console.error(error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to update fulfillment.",
     });
   }
 });

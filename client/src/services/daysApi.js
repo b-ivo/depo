@@ -124,3 +124,21 @@ export async function getCurrentDay() {
 
   return data;
 }
+
+export function addBeerToCurrentDay(beer) {
+  return apiRequest("/days/add-beer", {
+    method: "POST",
+    body: JSON.stringify({
+      beer,
+    }),
+  });
+}
+
+export function updateFulfillment(beerId, quantity) {
+  return apiRequest(`/days/fulfillment/${beerId}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      quantity,
+    }),
+  });
+}
