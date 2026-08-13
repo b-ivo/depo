@@ -23,6 +23,13 @@ app.use("/api/days", daysRouter);
 app.use("/api/inventory-movements", inventoryMovementsRouter);
 app.use("/api/initial-stock", initialStockRouter);
 
+app.get("/api/health", (req, res) => {
+  res.json({
+    success: true,
+    message: "Mini DEPO API is running",
+  });
+});
+
 app.listen(PORT, () => {
   console.log(`Mini DEPO API running on port ${PORT}`);
 });

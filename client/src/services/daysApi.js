@@ -61,68 +61,24 @@ export function closeDay() {
   });
 }
 
-export async function closeBusinessDay() {
-  const response = await fetch("http://localhost:5000/api/days/close", {
+export function closeBusinessDay() {
+  return apiRequest("/days/close", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to close business day.");
-  }
-
-  return data;
 }
 
-export async function getDailyRecord(id) {
-  const response = await fetch(`http://localhost:5000/api/days/${id}`);
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to retrieve daily record.");
-  }
-
-  return data;
+export function getDailyRecord(id) {
+  return apiRequest(`/days/${id}`);
 }
 
-export async function startBusinessDay() {
-  const response = await fetch("http://localhost:5000/api/days/start", {
+export function startBusinessDay() {
+  return apiRequest("/days/start", {
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
   });
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    throw new Error(data.message || "Failed to start business day.");
-  }
-
-  return data;
 }
 
-export async function getCurrentDay() {
-  const response = await fetch("http://localhost:5000/api/days/current");
-
-  const data = await response.json();
-
-  if (!response.ok) {
-    const error = new Error(
-      data.message || "Failed to retrieve current business day.",
-    );
-
-    error.code = data.code;
-
-    throw error;
-  }
-
-  return data;
+export function getCurrentDay() {
+  return apiRequest("/days/current");
 }
 
 export function addBeerToCurrentDay(beer) {
