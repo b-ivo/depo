@@ -1,5 +1,7 @@
 const API_URL = `${import.meta.env.VITE_API_URL}/api`;
 
+console.log("API URL:", API_URL);
+
 export async function apiRequest(endpoint, options = {}) {
   const response = await fetch(`${API_URL}${endpoint}`, {
     headers: {
