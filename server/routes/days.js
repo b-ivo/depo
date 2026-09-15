@@ -881,14 +881,4 @@ router.get("/:id", async (req, res) => {
   }
 });
 
-router.get("/debug/all", async (req, res) => {
-  const days = await DailyRecord.find().sort({ date: -1 });
-
-  res.json({
-    success: true,
-    count: days.length,
-    data: days,
-  });
-})
-
 export default router;

@@ -56,7 +56,6 @@ router.post("/login", async (req, res) => {
     const token = jwt.sign(
       {
         userId: user._id,
-        role: user.role,
       },
       process.env.JWT_SECRET,
       {
@@ -71,7 +70,6 @@ router.post("/login", async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
-        role: user.role,
         token,
       },
     });
@@ -114,7 +112,6 @@ router.get("/me", authMiddleware, async (req, res) => {
         id: user._id,
         email: user.email,
         username: user.username,
-        role: user.role,
         active: user.active,
       },
     });
