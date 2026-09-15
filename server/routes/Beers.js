@@ -1,11 +1,12 @@
 import express from "express";
 import mongoose from "mongoose";
 import Beer from "../models/Beer.js";
+import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
 // Get all active beers
-router.get("/", async (req, res) => {
+router.get("/", authMiddleware, async (req, res) => {
   try {
     const beers = await Beer.find().sort({ name: 1 });
 
