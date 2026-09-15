@@ -7,6 +7,7 @@ import DailyHistoryDetail from "./pages/DailyHistoryDetail";
 import BeerManagement from "./pages/BeerManagement";
 import InventoryManagement from "./pages/InventoryManagement";
 import Login from "./pages/Login";
+import Profile from "./pages/Profile";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 
@@ -30,6 +31,7 @@ function App() {
           path="/inventory"
           element={<InventoryManagement />}
         />
+        <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>
   );

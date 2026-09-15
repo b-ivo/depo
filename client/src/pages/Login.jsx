@@ -6,7 +6,7 @@ import { apiRequest } from "../services/api";
 export default function Login() {
   const navigate = useNavigate();
 
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [loading, setLoading] = useState(false);
@@ -17,8 +17,8 @@ export default function Login() {
 
     setError("");
 
-    if (!username || !password) {
-      setError("Username and password are required.");
+    if (!email || !password) {
+      setError("Email and password are required.");
       return;
     }
 
@@ -28,7 +28,7 @@ export default function Login() {
       const data = await apiRequest("/auth/login", {
         method: "POST",
         body: JSON.stringify({
-          username,
+          email,
           password,
         }),
       });
@@ -57,9 +57,7 @@ export default function Login() {
           Mini DEPO
         </h1>
 
-        <p className="text-gray-400 text-center mb-8">
-          Login to your account
-        </p>
+        <p className="text-gray-400 text-center mb-8">Login to your account</p>
 
         {error && (
           <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded-lg mb-4">
@@ -68,23 +66,19 @@ export default function Login() {
         )}
 
         <div className="mb-4">
-          <label className="block text-white mb-2">
-            Username
-          </label>
+          <label className="block text-white mb-2">Email</label>
 
           <input
-            type="text"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Enter username"
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Enter your email"
             className="w-full h-11 px-4 rounded-lg bg-gray-700 text-white outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
 
         <div className="mb-6">
-          <label className="block text-white mb-2">
-            Password
-          </label>
+          <label className="block text-white mb-2">Password</label>
 
           <input
             type="password"
