@@ -1,4 +1,5 @@
 import { NavLink } from "react-router-dom";
+import { logout } from "../../services/api";
 
 const navigation = [
   {
@@ -83,6 +84,12 @@ function Sidebar({ open, onClose }) {
             </NavLink>
           ))}
         </nav>
+        <button
+          onClick={logout}
+          className="bg-blue-950 p-3 m-4 rounded text-white font-bold cursor-pointer hover:bg-blue-800"
+        >
+          Logout
+        </button>
 
         {/* Footer */}
         <div className="border-t border-slate-200 p-4">
