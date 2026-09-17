@@ -13,11 +13,14 @@ const router = express.Router();
 */
 router.post("/start", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
+
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
     // Prevent starting the same business day twice.
     const existingDay = await DailyRecord.findOne({
+      businessId,
       date: today,
     });
 
@@ -28,8 +31,10 @@ router.post("/start", async (req, res) => {
       });
     }
 
-    // Find the most recent business day.
-    const previousDay = await DailyRecord.findOne().sort({
+    // Find the most recent business day for THIS business.
+    const previousDay = await DailyRecord.findOne({
+      businessId,
+    }).sort({
       date: -1,
     });
 
@@ -63,6 +68,7 @@ router.post("/start", async (req, res) => {
     }));
 
     const dailyRecord = await DailyRecord.create({
+      businessId,
       date: today,
       stock,
 
@@ -102,7 +108,10 @@ router.post("/start", async (req, res) => {
 */
 router.get("/current", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
+
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -120,6 +129,7 @@ router.get("/current", async (req, res) => {
     today.setHours(0, 0, 0, 0);
 
     const todayDay = await DailyRecord.findOne({
+      businessId,
       date: today,
     });
 
@@ -146,10 +156,12 @@ router.get("/current", async (req, res) => {
   }
 });
 
-
-// Add a beer to the current open business day
+/*
+  ADD A BEER TO THE CURRENT OPEN BUSINESS DAY
+*/
 router.post("/add-beer", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { beer } = req.body;
 
     if (!beer) {
@@ -167,8 +179,11 @@ router.post("/add-beer", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -177,8 +192,10 @@ router.post("/add-beer", async (req, res) => {
       });
     }
 
+    // Beer must belong to the current business.
     const selectedBeer = await Beer.findOne({
       _id: beer,
+      businessId,
       active: true,
     });
 
@@ -234,6 +251,7 @@ router.post("/add-beer", async (req, res) => {
 */
 router.post("/fulfillment", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { beer, quantity } = req.body;
 
     if (!beer || quantity === undefined) {
@@ -262,6 +280,7 @@ router.post("/fulfillment", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -276,6 +295,7 @@ router.post("/fulfillment", async (req, res) => {
 
     const selectedBeer = await Beer.findOne({
       _id: beer,
+      businessId,
       active: true,
     });
 
@@ -311,6 +331,7 @@ router.post("/fulfillment", async (req, res) => {
     await currentDay.save();
 
     const movement = await InventoryMovement.create({
+      businessId,
       beer,
       type: "fulfillment",
       quantity,
@@ -335,9 +356,12 @@ router.post("/fulfillment", async (req, res) => {
   }
 });
 
-// Update the total fulfillment for a beer in the current open business day
+/*
+  UPDATE TOTAL FULFILLMENT FOR A BEER
+*/
 router.patch("/fulfillment/:beerId", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { beerId } = req.params;
     const { quantity } = req.body;
 
@@ -360,8 +384,11 @@ router.patch("/fulfillment/:beerId", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
-    }).sort({ date: -1 });
+    }).sort({
+      date: -1,
+    });
 
     if (!currentDay) {
       return res.status(400).json({
@@ -381,8 +408,6 @@ router.patch("/fulfillment/:beerId", async (req, res) => {
       });
     }
 
-    // If evening stock has already been recorded,
-    // changing fulfillment could invalidate the sales calculation.
     if (stockItem.evening !== null) {
       return res.status(400).json({
         success: false,
@@ -416,6 +441,7 @@ router.patch("/fulfillment/:beerId", async (req, res) => {
 */
 router.patch("/evening-stock", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { stock } = req.body;
 
     if (!Array.isArray(stock)) {
@@ -426,6 +452,7 @@ router.patch("/evening-stock", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -501,7 +528,6 @@ router.patch("/evening-stock", async (req, res) => {
     currentDay.totals.sold = totalSold;
     currentDay.totals.expectedSales = totalExpectedSales;
 
-    // If Mobile Money was already recorded, recalculate expected cash.
     if (currentDay.payments.mobileMoney !== null) {
       currentDay.totals.expectedCash =
         totalExpectedSales - currentDay.payments.mobileMoney;
@@ -526,10 +552,10 @@ router.patch("/evening-stock", async (req, res) => {
 
 /*
   RECORD MOBILE MONEY
-  Mobile Money is optional.
 */
 router.patch("/mobile-money", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { mobileMoney } = req.body;
 
     if (mobileMoney === undefined) {
@@ -551,6 +577,7 @@ router.patch("/mobile-money", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -577,7 +604,8 @@ router.patch("/mobile-money", async (req, res) => {
       });
     }
 
-    const expectedCash = currentDay.totals.expectedSales - mobileMoney;
+    const expectedCash =
+      currentDay.totals.expectedSales - mobileMoney;
 
     currentDay.payments.mobileMoney = mobileMoney;
     currentDay.totals.expectedCash = expectedCash;
@@ -601,10 +629,10 @@ router.patch("/mobile-money", async (req, res) => {
 
 /*
   RECORD ACTUAL CASH
-  Mobile Money is optional.
 */
 router.patch("/actual-cash", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { actualCash } = req.body;
 
     if (actualCash === undefined) {
@@ -626,6 +654,7 @@ router.patch("/actual-cash", async (req, res) => {
     }
 
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -645,15 +674,15 @@ router.patch("/actual-cash", async (req, res) => {
       });
     }
 
-    // Mobile Money is optional.
-    // If none was recorded, treat it as zero.
     if (currentDay.payments.mobileMoney === null) {
       currentDay.payments.mobileMoney = 0;
 
-      currentDay.totals.expectedCash = currentDay.totals.expectedSales;
+      currentDay.totals.expectedCash =
+        currentDay.totals.expectedSales;
     }
 
-    const difference = actualCash - currentDay.totals.expectedCash;
+    const difference =
+      actualCash - currentDay.totals.expectedCash;
 
     let status;
 
@@ -691,7 +720,10 @@ router.patch("/actual-cash", async (req, res) => {
 */
 router.post("/close", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
+
     const currentDay = await DailyRecord.findOne({
+      businessId,
       closed: false,
     }).sort({
       date: -1,
@@ -704,7 +736,6 @@ router.post("/close", async (req, res) => {
       });
     }
 
-    // Evening stock must be completed.
     if (currentDay.totals.expectedSales === null) {
       return res.status(400).json({
         success: false,
@@ -712,15 +743,13 @@ router.post("/close", async (req, res) => {
       });
     }
 
-    // Mobile Money is optional.
-    // If none was recorded, treat it as zero.
     if (currentDay.payments.mobileMoney === null) {
       currentDay.payments.mobileMoney = 0;
 
-      currentDay.totals.expectedCash = currentDay.totals.expectedSales;
+      currentDay.totals.expectedCash =
+        currentDay.totals.expectedSales;
     }
 
-    // Actual cash is required.
     if (currentDay.payments.actualCash === null) {
       return res.status(400).json({
         success: false,
@@ -770,7 +799,10 @@ router.post("/close", async (req, res) => {
 */
 router.get("/", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
+
     const days = await DailyRecord.find({
+      businessId,
       closed: true,
     }).sort({
       date: -1,
@@ -791,8 +823,12 @@ router.get("/", async (req, res) => {
   }
 });
 
+/*
+  GET HISTORY BY DATE RANGE
+*/
 router.get("/history/range", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { from, to } = req.query;
 
     if (!from || !to) {
@@ -805,7 +841,10 @@ router.get("/history/range", async (req, res) => {
     const startDate = new Date(`${from}T00:00:00.000Z`);
     const endDate = new Date(`${to}T23:59:59.999Z`);
 
-    if (Number.isNaN(startDate.getTime()) || Number.isNaN(endDate.getTime())) {
+    if (
+      Number.isNaN(startDate.getTime()) ||
+      Number.isNaN(endDate.getTime())
+    ) {
       return res.status(400).json({
         success: false,
         message: "Invalid date range.",
@@ -820,6 +859,7 @@ router.get("/history/range", async (req, res) => {
     }
 
     const days = await DailyRecord.find({
+      businessId,
       closed: true,
       date: {
         $gte: startDate,
@@ -849,6 +889,7 @@ router.get("/history/range", async (req, res) => {
 */
 router.get("/:id", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { id } = req.params;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -858,7 +899,12 @@ router.get("/:id", async (req, res) => {
       });
     }
 
-    const day = await DailyRecord.findById(id);
+    // IMPORTANT:
+    // The record must belong to the authenticated business.
+    const day = await DailyRecord.findOne({
+      _id: id,
+      businessId,
+    });
 
     if (!day) {
       return res.status(404).json({

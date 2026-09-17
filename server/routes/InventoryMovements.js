@@ -1,21 +1,23 @@
 import express from "express";
 import mongoose from "mongoose";
+
 import InventoryMovement from "../models/InventoryMovement.js";
 import Beer from "../models/Beer.js";
 
 const router = express.Router();
 
-/*
-  GET ALL INVENTORY MOVEMENTS
-*/
+// ===============================
+// GET ALL INVENTORY MOVEMENTS
+// ===============================
 router.get("/", async (req, res) => {
   try {
-    const movements = await InventoryMovement.find()
+    const businessId = req.user.businessId;
+
+    const movements = await InventoryMovement.find({
+      businessId,
+    })
       .populate("beer", "name price")
-      .sort({
-        date: -1,
-        createdAt: -1,
-      });
+      .sort({ date: -1 });
 
     res.json({
       success: true,
@@ -27,15 +29,18 @@ router.get("/", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Failed to retrieve inventory movements.",
+      message: "Failed to fetch inventory movements.",
     });
   }
 });
 
+// ===============================
 // GET MOVEMENTS FOR ONE BEER
+// ===============================
 router.get("/beer/:beerId", async (req, res) => {
   try {
     const { beerId } = req.params;
+    const businessId = req.user.businessId;
 
     if (!mongoose.Types.ObjectId.isValid(beerId)) {
       return res.status(400).json({
@@ -44,7 +49,11 @@ router.get("/beer/:beerId", async (req, res) => {
       });
     }
 
-    const beer = await Beer.findById(beerId);
+    // Make sure the beer belongs to this business
+    const beer = await Beer.findOne({
+      _id: beerId,
+      businessId,
+    });
 
     if (!beer) {
       return res.status(404).json({
@@ -54,13 +63,11 @@ router.get("/beer/:beerId", async (req, res) => {
     }
 
     const movements = await InventoryMovement.find({
+      businessId,
       beer: beerId,
     })
       .populate("beer", "name price")
-      .sort({
-        date: -1,
-        createdAt: -1,
-      });
+      .sort({ date: -1 });
 
     res.json({
       success: true,
@@ -72,40 +79,40 @@ router.get("/beer/:beerId", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Failed to retrieve beer movements.",
+      message: "Failed to fetch beer movements.",
     });
   }
 });
 
-/*
-  GET MOVEMENTS FOR ONE DAY
-*/
+// ===============================
+// GET MOVEMENTS FOR ONE DAY
+// ===============================
 router.get("/day/:date", async (req, res) => {
   try {
     const { date } = req.params;
+    const businessId = req.user.businessId;
 
-    const startDate = new Date(`${date}T00:00:00.000Z`);
+    const start = new Date(date);
 
-    if (Number.isNaN(startDate.getTime())) {
+    if (Number.isNaN(start.getTime())) {
       return res.status(400).json({
         success: false,
         message: "Invalid date.",
       });
     }
 
-    const endDate = new Date(startDate);
-    endDate.setUTCDate(endDate.getUTCDate() + 1);
+    const end = new Date(start);
+    end.setDate(end.getDate() + 1);
 
     const movements = await InventoryMovement.find({
+      businessId,
       date: {
-        $gte: startDate,
-        $lt: endDate,
+        $gte: start,
+        $lt: end,
       },
     })
       .populate("beer", "name price")
-      .sort({
-        createdAt: 1,
-      });
+      .sort({ date: -1 });
 
     res.json({
       success: true,
@@ -117,7 +124,7 @@ router.get("/day/:date", async (req, res) => {
 
     res.status(500).json({
       success: false,
-      message: "Failed to retrieve daily inventory movements.",
+      message: "Failed to fetch daily inventory movements.",
     });
   }
 });

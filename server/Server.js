@@ -10,9 +10,11 @@ import beersRouter from "./routes/Beers.js";
 import inventoryMovementsRouter from "./routes/InventoryMovements.js";
 import initialStockRouter from "./routes/InitialStock.js";
 import daysRouter from "./routes/days.js";
+import usersRoutes from "./routes/users.js";
+import businessesRoutes from "./routes/businesses.js";
 
 import authMiddleware from "./middleware/auth.js";
-import adminMiddleware from "./middleware/adminMiddleware.js";
+import requireRole from "./middleware/roles.js"
 
 setServers(["8.8.8.8", "1.1.1.1"]);
 
@@ -63,7 +65,7 @@ app.use(authMiddleware);
 
 
 // Beers
-app.get("/api/admin/test", adminMiddleware, (req, res) => {
+app.get("/api/admin/test", requireRole, (req, res) => {
   res.json({
     success: true,
     message: "Admin access confirmed.",
@@ -82,6 +84,8 @@ app.use(
 
 // Initial stock
 app.use("/api/initial-stock", initialStockRouter);
+app.use("/api/businesses", businessesRoutes);
+app.use("/api/users", usersRoutes);
 
 
 // =====================================

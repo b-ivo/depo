@@ -46,7 +46,25 @@ export async function apiRequest(endpoint, options = {}) {
   return data;
 }
 
+export function getCurrentUser() {
+  try {
+    const raw = localStorage.getItem("user");
+    return raw ? JSON.parse(raw) : null;
+  } catch {
+    return null;
+  }
+}
+
+export function setCurrentUser(user) {
+  if (user) {
+    localStorage.setItem("user", JSON.stringify(user));
+  } else {
+    localStorage.removeItem("user");
+  }
+}
+
 export function logout() {
   localStorage.removeItem("token");
+  localStorage.removeItem("user");
   window.location.href = "/login";
 }

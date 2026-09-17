@@ -1,14 +1,21 @@
 import express from "express";
 import mongoose from "mongoose";
 import Beer from "../models/Beer.js";
-import authMiddleware from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Get all active beers
-router.get("/", authMiddleware, async (req, res) => {
+// ===============================
+// GET ALL BEERS
+// ===============================
+router.get("/", async (req, res) => {
   try {
-    const beers = await Beer.find().sort({ name: 1 });
+    const businessId = req.user.businessId;
+
+    const beers = await Beer.find({
+      businessId,
+    }).sort({
+      name: 1,
+    });
 
     res.json({
       success: true,
@@ -25,9 +32,12 @@ router.get("/", authMiddleware, async (req, res) => {
   }
 });
 
-// Add a new beer
+// ===============================
+// ADD BEER
+// ===============================
 router.post("/", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { name, price } = req.body;
 
     if (!name || price === undefined) {
@@ -44,15 +54,23 @@ router.post("/", async (req, res) => {
       });
     }
 
-    if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+    if (
+      typeof price !== "number" ||
+      !Number.isFinite(price) ||
+      price < 0
+    ) {
       return res.status(400).json({
         success: false,
         message: "Price must be a valid non-negative number.",
       });
     }
 
+    const trimmedName = name.trim();
+
+    // Duplicate check only inside this business.
     const existingBeer = await Beer.findOne({
-      name: name.trim(),
+      name: trimmedName,
+      businessId,
     });
 
     if (existingBeer) {
@@ -63,9 +81,10 @@ router.post("/", async (req, res) => {
     }
 
     const beer = await Beer.create({
-      name: name.trim(),
+      name: trimmedName,
       price,
       active: true,
+      businessId,
     });
 
     res.status(201).json({
@@ -83,9 +102,12 @@ router.post("/", async (req, res) => {
   }
 });
 
-// Update a beer
+// ===============================
+// UPDATE BEER
+// ===============================
 router.patch("/:id", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { id } = req.params;
     const { name, price } = req.body;
 
@@ -103,7 +125,10 @@ router.patch("/:id", async (req, res) => {
       });
     }
 
-    const beer = await Beer.findById(id);
+    const beer = await Beer.findOne({
+      _id: id,
+      businessId,
+    });
 
     if (!beer) {
       return res.status(404).json({
@@ -120,8 +145,11 @@ router.patch("/:id", async (req, res) => {
         });
       }
 
+      const trimmedName = name.trim();
+
       const duplicate = await Beer.findOne({
-        name: name.trim(),
+        name: trimmedName,
+        businessId,
         _id: { $ne: id },
       });
 
@@ -132,11 +160,15 @@ router.patch("/:id", async (req, res) => {
         });
       }
 
-      beer.name = name.trim();
+      beer.name = trimmedName;
     }
 
     if (price !== undefined) {
-      if (typeof price !== "number" || !Number.isFinite(price) || price < 0) {
+      if (
+        typeof price !== "number" ||
+        !Number.isFinite(price) ||
+        price < 0
+      ) {
         return res.status(400).json({
           success: false,
           message: "Price must be a valid non-negative number.",
@@ -163,8 +195,12 @@ router.patch("/:id", async (req, res) => {
   }
 });
 
+// ===============================
+// ACTIVATE / DEACTIVATE BEER
+// ===============================
 router.patch("/:id/status", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { id } = req.params;
     const { active } = req.body;
 
@@ -182,7 +218,10 @@ router.patch("/:id/status", async (req, res) => {
       });
     }
 
-    const beer = await Beer.findById(id);
+    const beer = await Beer.findOne({
+      _id: id,
+      businessId,
+    });
 
     if (!beer) {
       return res.status(404).json({

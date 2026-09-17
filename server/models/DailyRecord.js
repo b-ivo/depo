@@ -66,11 +66,18 @@ const dailyStockSchema = new mongoose.Schema(
 
 const dailyRecordSchema = new mongoose.Schema(
   {
+    // The DEPO/business this daily record belongs to.
+    businessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
+      index: true,
+    },
+
     // Represents the business day, not the exact time.
     date: {
       type: Date,
       required: true,
-      unique: true,
     },
 
     stock: {
@@ -131,10 +138,16 @@ const dailyRecordSchema = new mongoose.Schema(
       default: false,
     },
   },
-
   {
     timestamps: true,
   },
+);
+
+// One business can only have one DailyRecord for a specific date.
+// Different businesses can have DailyRecords on the same date.
+dailyRecordSchema.index(
+  { businessId: 1, date: 1 },
+  { unique: true },
 );
 
 const DailyRecord = mongoose.model("DailyRecord", dailyRecordSchema);

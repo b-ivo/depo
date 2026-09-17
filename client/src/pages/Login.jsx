@@ -46,8 +46,10 @@ export default function Login() {
           email: data.data.email,
           username: data.data.username,
           role: data.data.role,
-        })
-      )
+          businessId: data.data.businessId,
+          business: data.data.business,
+        }),
+      );
 
       // Go to dashboard
       if (data.data.role === "admin") {

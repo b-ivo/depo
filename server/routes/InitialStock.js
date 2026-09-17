@@ -1,11 +1,20 @@
 import express from "express";
+import mongoose from "mongoose";
+
 import Beer from "../models/Beer.js";
 import DailyRecord from "../models/DailyRecord.js";
 
 const router = express.Router();
 
+/*
+  CREATE INITIAL STOCK
+
+  This can only happen if this business
+  has no DailyRecords yet.
+*/
 router.post("/", async (req, res) => {
   try {
+    const businessId = req.user.businessId;
     const { date, stock } = req.body;
 
     if (!date || !Array.isArray(stock)) {
@@ -15,7 +24,10 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const existingRecords = await DailyRecord.countDocuments();
+    // Check only this business.
+    const existingRecords = await DailyRecord.countDocuments({
+      businessId,
+    });
 
     if (existingRecords > 0) {
       return res.status(400).json({
@@ -25,7 +37,11 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const activeBeers = await Beer.find({ active: true }).sort({
+    // Only active beers belonging to this business.
+    const activeBeers = await Beer.find({
+      businessId,
+      active: true,
+    }).sort({
       name: 1,
     });
 
@@ -36,7 +52,29 @@ router.post("/", async (req, res) => {
       });
     }
 
-    const stockMap = new Map(stock.map((item) => [item.beer, item.quantity]));
+    const stockMap = new Map();
+
+    for (const item of stock) {
+      if (!item.beer || !mongoose.Types.ObjectId.isValid(item.beer)) {
+        return res.status(400).json({
+          success: false,
+          message: "Invalid beer ID in initial stock.",
+        });
+      }
+
+      if (
+        typeof item.quantity !== "number" ||
+        !Number.isInteger(item.quantity) ||
+        item.quantity < 0
+      ) {
+        return res.status(400).json({
+          success: false,
+          message: "Initial stock quantities must be non-negative integers.",
+        });
+      }
+
+      stockMap.set(item.beer, item.quantity);
+    }
 
     const dailyStock = [];
 
@@ -50,17 +88,6 @@ router.post("/", async (req, res) => {
         });
       }
 
-      if (
-        typeof quantity !== "number" ||
-        !Number.isInteger(quantity) ||
-        quantity < 0
-      ) {
-        return res.status(400).json({
-          success: false,
-          message: `Invalid stock quantity for ${beer.name}.`,
-        });
-      }
-
       dailyStock.push({
         beer: beer._id,
         name: beer.name,
@@ -71,6 +98,7 @@ router.post("/", async (req, res) => {
     }
 
     const dailyRecord = await DailyRecord.create({
+      businessId,
       date: new Date(date),
       stock: dailyStock,
       closed: false,

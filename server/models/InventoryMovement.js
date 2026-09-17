@@ -2,6 +2,14 @@ import mongoose from "mongoose";
 
 const inventoryMovementSchema = new mongoose.Schema(
   {
+    // The business that owns this movement
+    businessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
+      index: true,
+    },
+
     beer: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Beer",

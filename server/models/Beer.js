@@ -6,7 +6,6 @@ const beerSchema = new mongoose.Schema(
       type: String,
       required: true,
       trim: true,
-      unique: true,
     },
 
     price: {
@@ -19,10 +18,16 @@ const beerSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+
+    businessId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Business",
+      required: true,
+    },
   },
   {
     timestamps: true,
-  },
+  }
 );
 
 const Beer = mongoose.model("Beer", beerSchema);
