@@ -8,8 +8,10 @@ import BeerManagement from "./pages/BeerManagement";
 import InventoryManagement from "./pages/InventoryManagement";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
+import AdminDashboard from "./pages/AdminDashboard";
 
 import ProtectedRoute from "./components/ProtectedRoute";
+import AdminRoute from "./components/AdminRoute";
 
 function App() {
   return (
@@ -20,17 +22,28 @@ function App() {
       {/* Protected routes */}
       <Route element={<ProtectedRoute />}>
         <Route path="/" element={<Dashboard />} />
+
         <Route path="/daily" element={<DailyRecord />} />
+
         <Route path="/history" element={<History />} />
+
         <Route
           path="/history/:id"
           element={<DailyHistoryDetail />}
         />
+
         <Route path="/beers" element={<BeerManagement />} />
+
         <Route
           path="/inventory"
           element={<InventoryManagement />}
         />
+
+        {/* Admin only */}
+        <Route element={<AdminRoute />}>
+          <Route path="/admin" element={<AdminDashboard />} />
+        </Route>
+
         <Route path="/profile" element={<Profile />} />
       </Route>
     </Routes>

@@ -38,8 +38,23 @@ export default function Login() {
       // Save JWT
       localStorage.setItem("token", data.data.token);
 
+      // Save user info
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data.data.id,
+          email: data.data.email,
+          username: data.data.username,
+          role: data.data.role,
+        })
+      )
+
       // Go to dashboard
-      navigate("/");
+      if (data.data.role === "admin") {
+        navigate("/admin");
+      } else {
+        navigate("/");
+      }
     } catch (error) {
       setError(error.message);
     } finally {
