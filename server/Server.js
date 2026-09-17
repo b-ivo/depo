@@ -65,7 +65,7 @@ app.use(authMiddleware);
 
 
 // Beers
-app.get("/api/admin/test", requireRole, (req, res) => {
+app.get("/api/admin/test", requireRole("admin", "superadmin"), (req, res) => {
   res.json({
     success: true,
     message: "Admin access confirmed.",
