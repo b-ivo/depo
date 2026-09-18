@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { apiRequest } from "../services/api";
 import { useLanguage } from "../i18n/context.js";
 import LanguageSwitcher from "../i18n/LanguageSwitcher.jsx";
+import { ADMIN_LOGIN_URL } from "../config/portal.js";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -91,7 +92,7 @@ export default function Login() {
               <div>
                 <p className="text-sm font-medium text-amber-800">{t("login.adminMustUseAdmin")}</p>
                 <p className="mt-1 text-xs text-amber-700">Staff area is for staff only. Admins belong on the admin portal.</p>
-                <a href="http://localhost:5174/login" className="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
+                <a href={ADMIN_LOGIN_URL} className="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
                   {t("login.goToAdmin")} →
                 </a>
               </div>

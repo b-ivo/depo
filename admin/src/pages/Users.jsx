@@ -3,6 +3,7 @@ import api from "../services/api";
 import Modal from "../components/Modal";
 import { useLanguage } from "../i18n/context.js";
 import { getAdminUser } from "../utils/auth";
+import { CLIENT_LOGIN_URL } from "../config/portal.js";
 
 function RoleBadge({ role }) {
   const styles = {
@@ -48,7 +49,7 @@ function Users() {
 
   const [createdStaff, setCreatedStaff] = useState(null);
   const [copied, setCopied] = useState(false);
-  const clientLoginUrl = t("users.clientLoginLink");
+  const clientLoginUrl = CLIENT_LOGIN_URL;
 
   useEffect(() => {
     const load = async () => {
