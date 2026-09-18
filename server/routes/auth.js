@@ -107,33 +107,10 @@ router.post("/login", loginRateLimit, async (req, res) => {
       });
     }
 
-    // ======================================
-    // ORIGIN-BASED ROLE CHECK (optional hardening)
-    // Client portal (5173) = staff only, Admin portal (5174) = admin/superadmin only
-    // Bypass if no Origin (curl, mobile, tests)
-    // ======================================
-    const origin = req.headers.origin;
-    const clientUrl = process.env.CLIENT_URL || "http://localhost:5173";
-    const adminUrl = process.env.ADMIN_URL || "http://localhost:5174";
-
-    if (origin) {
-      const isClientOrigin = origin === clientUrl;
-      const isAdminOrigin = origin === adminUrl;
-
-      if (isClientOrigin && (user.role === "admin" || user.role === "superadmin")) {
-        return res.status(403).json({
-          success: false,
-          message: "Admins must use the admin portal.",
-        });
-      }
-
-      if (isAdminOrigin && user.role === "staff") {
-        return res.status(403).json({
-          success: false,
-          message: "Staff must use the client portal.",
-        });
-      }
-    }
+    // Role check is handled client-side per portal:
+    // - admin portal (5174) allows admin/superadmin only (admin/src/pages/Login.jsx:31)
+    // - client portal (5173) allows staff only (client/src/pages/Login.jsx:42)
+    // Server issues JWT for any valid credentials; frontend enforces portal access by role.
 
     // ======================================
     // CREATE JWT
