@@ -95,6 +95,16 @@
   "auth.role.staff": "Umukozi",
   "auth.role.superadmin": "Umutunganya mukuru",
 
+  "login.title": "Injira",
+  "login.description": "Andika ibimenyetso byawe.",
+  "login.signingIn": "Kwinjira...",
+  "login.accessDenied": "Ntabwo ufite uburenganzira bwo kwinjira muri porogaramu y'ubuyobozi.",
+  "login.staffMustUseClient": "Konti z'abakozi zigomba gukoresha urubuga rw'abakiriya.",
+  "login.adminMustUseAdmin": "Konti za admin na superadmin zigomba gukoresha urubuga rw'ubuyobozi.",
+  "login.goToClient": "Jya ku rubuga rw'abakiriya",
+  "login.goToAdmin": "Jya ku rubuga rw'ubuyobozi",
+  "login.failed": "Kwinjira byanze. Ongera ugerageze.",
+
   "profile.title": "Umwirondoro wanjye",
   "profile.description": "Cunga konti yawe",
   "profile.loading": "Umwirondoro urapakirwa...",

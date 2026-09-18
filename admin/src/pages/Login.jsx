@@ -29,7 +29,7 @@ function Login() {
       const user = response.data.data;
 
       if (user.role !== "admin" && user.role !== "superadmin") {
-        setError(t("login.accessDenied"));
+        setError("STAFF_PORTAL");
         return;
       }
 
@@ -80,8 +80,18 @@ function Login() {
           </div>
 
           {error && (
-            <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
-              {error}
+            <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${error === "STAFF_PORTAL" ? "bg-amber-50 border border-amber-200 text-amber-800" : "bg-red-50 text-red-700"}`}>
+              {error === "STAFF_PORTAL" ? (
+                <div>
+                  <p className="font-medium">{t("login.staffMustUseClient")}</p>
+                  <p className="mt-1 text-xs text-amber-700">This portal is for admins only. Staff should use the client portal.</p>
+                  <a href="http://localhost:5173/login" className="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
+                    {t("login.goToClient")} →
+                  </a>
+                </div>
+              ) : (
+                error
+              )}
             </div>
           )}
 

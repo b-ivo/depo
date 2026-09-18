@@ -302,6 +302,10 @@
   "login.description": "Enter your administrator credentials.",
   "login.signingIn": "Signing in...",
   "login.accessDenied": "You do not have access to the admin application.",
+  "login.staffMustUseClient": "Staff accounts must use the client portal.",
+  "login.adminMustUseAdmin": "Admin and superadmin accounts must use the admin portal.",
+  "login.goToClient": "Go to client portal",
+  "login.goToAdmin": "Go to admin portal",
   "login.failed": "Login failed. Please try again.",
 
   "superadmin.title": "Superadmin Dashboard",

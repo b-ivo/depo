@@ -95,6 +95,16 @@
   "auth.role.staff": "Personnel",
   "auth.role.superadmin": "Superadministrateur",
 
+  "login.title": "Connexion",
+  "login.description": "Saisissez vos identifiants.",
+  "login.signingIn": "Connexion en cours...",
+  "login.accessDenied": "Vous n'avez pas accès à l'application d'administration.",
+  "login.staffMustUseClient": "Les comptes staff doivent utiliser le portail client.",
+  "login.adminMustUseAdmin": "Les comptes admin et superadmin doivent utiliser le portail admin.",
+  "login.goToClient": "Aller au portail client",
+  "login.goToAdmin": "Aller au portail admin",
+  "login.failed": "Échec de la connexion. Veuillez réessayer.",
+
   "profile.title": "Mon profil",
   "profile.description": "Gérez votre compte",
   "profile.loading": "Chargement du profil...",

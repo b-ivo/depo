@@ -302,6 +302,10 @@
   "login.description": "Andika ibimenyetso byawe by'ubuyobozi.",
   "login.signingIn": "Kwinjira...",
   "login.accessDenied": "Ntabwo ufite uburenganzira bwo kwinjira muri porogaramu y'ubuyobozi.",
+  "login.staffMustUseClient": "Konti z'abakozi zigomba gukoresha urubuga rw'abakiriya.",
+  "login.adminMustUseAdmin": "Konti za admin na superadmin zigomba gukoresha urubuga rw'ubuyobozi.",
+  "login.goToClient": "Jya ku rubuga rw'abakiriya",
+  "login.goToAdmin": "Jya ku rubuga rw'ubuyobozi",
   "login.failed": "Kwinjira byanze. Ongera ugerageze.",
 
   "superadmin.title": "Ikibaho cy'Ubuyobozi Bukuru",

@@ -40,7 +40,7 @@ export default function Login() {
 
       // Client portal is for staff only — block admin/superadmin
       if (data.data.role === "admin" || data.data.role === "superadmin") {
-        setError(t("login.accessDenied") || "Admins must use the admin portal (http://localhost:5174)");
+        setError("ADMIN_PORTAL");
         return;
       }
 
@@ -85,11 +85,21 @@ export default function Login() {
           <h2 className="text-2xl font-bold text-slate-900">{t("auth.login")}</h2>
           <p className="mt-1 text-sm text-slate-500">{t("auth.subtitle")}</p>
 
-          {error && (
-            <div className="mt-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
-              {error}
-            </div>
-          )}
+        {error && (
+          <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
+            {error === "ADMIN_PORTAL" ? (
+              <div>
+                <p className="text-sm font-medium text-amber-800">{t("login.adminMustUseAdmin")}</p>
+                <p className="mt-1 text-xs text-amber-700">Staff area is for staff only. Admins belong on the admin portal.</p>
+                <a href="http://localhost:5174/login" className="mt-2 inline-flex items-center gap-1 rounded-lg bg-slate-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-slate-800">
+                  {t("login.goToAdmin")} →
+                </a>
+              </div>
+            ) : (
+              <p className="text-sm text-red-700">{error}</p>
+            )}
+          </div>
+        )}
 
           <form onSubmit={handleLogin} className="mt-6 space-y-5">
             <div>
