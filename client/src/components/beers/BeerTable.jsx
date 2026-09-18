@@ -1,14 +1,16 @@
-import BeerStatusButton from "./BeerStatusButton";
+﻿import BeerStatusButton from "./BeerStatusButton";
+import { useLanguage } from "../../i18n/context.js";
 
 function BeerTable({ beers = [], onAdd, onEdit, onStatusChanged }) {
+  const { t } = useLanguage();
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-200 px-5 py-4">
         <div>
-          <h2 className="font-semibold text-slate-900">Beers</h2>
+          <h2 className="font-semibold text-slate-900">{t("beers.tableTitle")}</h2>
 
           <p className="mt-1 text-sm text-slate-500">
-            Products currently configured in the depot
+            {t("beers.tableDesc")}
           </p>
         </div>
 
@@ -17,14 +19,14 @@ function BeerTable({ beers = [], onAdd, onEdit, onStatusChanged }) {
           onClick={onAdd}
           className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
         >
-          Add Beer
+          {t("beers.addBeer")}
         </button>
       </div>
 
       {beers.length === 0 ? (
         <div className="p-8 text-center">
           <p className="text-sm text-slate-500">
-            No beers have been added yet.
+            {t("beers.noBeers")}
           </p>
 
           <button
@@ -32,7 +34,7 @@ function BeerTable({ beers = [], onAdd, onEdit, onStatusChanged }) {
             onClick={onAdd}
             className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
           >
-            Add Your First Beer
+            {t("beers.addFirstBeer")}
           </button>
         </div>
       ) : (
@@ -77,7 +79,7 @@ function BeerTable({ beers = [], onAdd, onEdit, onStatusChanged }) {
                           : "rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500"
                       }
                     >
-                      {beer.active ? "Active" : "Inactive"}
+                      {beer.active ? t("common.active") : t("common.inactive")}
                     </span>
                   </td>
 

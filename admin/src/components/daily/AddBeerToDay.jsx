@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { getBeers } from "../../services/beersApi";
 import { addBeerToCurrentDay } from "../../services/daysApi";
+import { useLanguage } from "../../i18n/context.js";
 
 function AddBeerToDay({ stock = [], onSuccess }) {
+  const { t } = useLanguage();
   const [beers, setBeers] = useState([]);
   const [selectedBeer, setSelectedBeer] = useState("");
   const [loading, setLoading] = useState(false);
@@ -36,7 +38,7 @@ function AddBeerToDay({ stock = [], onSuccess }) {
     event.preventDefault();
 
     if (!selectedBeer) {
-      setError("Please select a beer.");
+      setError(t("daily.fulfillmentSelectBeer"));
       return;
     }
 
@@ -48,7 +50,7 @@ function AddBeerToDay({ stock = [], onSuccess }) {
       await addBeerToCurrentDay(selectedBeer);
 
       setSelectedBeer("");
-      setSuccess("Beer added to today's stock.");
+      setSuccess(t("daily.addBeerAdded"));
 
       if (onSuccess) {
         await onSuccess();
@@ -64,11 +66,11 @@ function AddBeerToDay({ stock = [], onSuccess }) {
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div>
         <h2 className="font-semibold text-slate-900">
-          Add Beer to Today's Stock
+          {t("daily.addBeerTitle")}
         </h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Use this when a new beer is introduced during the business day.
+          {t("daily.addBeerDesc")}
         </p>
       </div>
 
@@ -86,7 +88,7 @@ function AddBeerToDay({ stock = [], onSuccess }) {
 
       {availableBeers.length === 0 && !loadingBeers ? (
         <p className="mt-4 text-sm text-slate-500">
-          All active beers are already part of today's stock.
+          {t("daily.allBeersInStock")}
         </p>
       ) : (
         <form
@@ -109,7 +111,7 @@ function AddBeerToDay({ stock = [], onSuccess }) {
               className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500"
             >
               <option value="">
-                {loadingBeers ? "Loading beers..." : "Select a beer"}
+                {loadingBeers ? t("daily.initStockLoadingBeers") : t("daily.selectBeerOption")}
               </option>
 
               {availableBeers.map((beer) => (
@@ -125,7 +127,7 @@ function AddBeerToDay({ stock = [], onSuccess }) {
             disabled={!selectedBeer || loading || loadingBeers}
             className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Adding..." : "Add Beer"}
+            {loading ? t("daily.adding") : t("beers.addBeer")}
           </button>
         </form>
       )}

@@ -1,4 +1,7 @@
+﻿import { useLanguage } from "../../i18n/context.js";
+
 function InventoryTable({ movements = [] }) {
+  const { t } = useLanguage();
   function formatDate(date) {
     if (!date) return "—";
 
@@ -20,12 +23,12 @@ function InventoryTable({ movements = [] }) {
 
   function getMovementLabel(type) {
     const labels = {
-      fulfillment: "Fulfillment",
-      purchase: "Purchase",
-      adjustment: "Adjustment",
+      fulfillment: t("inventory.typeFulfillment"),
+      purchase: t("inventory.typePurchase"),
+      adjustment: t("inventory.typeAdjustment"),
     };
 
-    return labels[type] || type || "Unknown";
+    return labels[type] || type || t("common.unknown");
   }
 
   function getMovementClasses(type) {
@@ -47,17 +50,17 @@ function InventoryTable({ movements = [] }) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="font-semibold text-slate-900">Inventory Movements</h2>
+        <h2 className="font-semibold text-slate-900">{t("inventory.movementsTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          History of stock movements recorded in the depot.
+          {t("inventory.movementsDesc")}
         </p>
       </div>
 
       {movements.length === 0 ? (
         <div className="p-10 text-center">
           <p className="text-sm text-slate-500">
-            No inventory movements found.
+            {t("inventory.noMovements")}
           </p>
         </div>
       ) : (
@@ -93,7 +96,7 @@ function InventoryTable({ movements = [] }) {
                   <td className="px-5 py-4">
                     <div>
                       <p className="font-medium text-slate-900">
-                        {movement.beer?.name || "Unknown beer"}
+                        {movement.beer?.name || t("inventory.unknownBeer")}
                       </p>
 
                       {movement.beer?.price !== undefined && (

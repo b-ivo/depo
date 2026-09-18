@@ -1,4 +1,7 @@
+﻿import { useLanguage } from "../../i18n/context.js";
+
 function InventorySummary({ movements = [] }) {
+  const { t } = useLanguage();
   const totalMovements = movements.length;
 
   const totalQuantity = movements.reduce(
@@ -16,24 +19,24 @@ function InventorySummary({ movements = [] }) {
 
   const cards = [
     {
-      label: "Total Movements",
+      label: t("inventory.totalMovements"),
       value: totalMovements,
-      description: "Inventory records",
+      description: t("inventory.totalMovementsDesc"),
     },
     {
-      label: "Total Quantity",
+      label: t("inventory.totalQuantity"),
       value: totalQuantity,
-      description: "Units moved",
+      description: t("inventory.totalQuantityDesc"),
     },
     {
-      label: "Fulfilled",
+      label: t("inventory.fulfilled"),
       value: fulfillmentQuantity,
-      description: "Units fulfilled",
+      description: t("inventory.fulfilledDesc"),
     },
     {
-      label: "Purchased",
+      label: t("inventory.purchased"),
       value: purchaseQuantity,
-      description: "Units purchased",
+      description: t("inventory.purchasedDesc"),
     },
   ];
 

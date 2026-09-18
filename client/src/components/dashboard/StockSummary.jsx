@@ -1,10 +1,13 @@
+﻿import { useLanguage } from "../../i18n/context.js";
+
 function StockSummary({ stock = [] }) {
+  const { t } = useLanguage();
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h3 className="font-semibold text-slate-900">Current Stock</h3>
+        <h3 className="font-semibold text-slate-900">{t("common.currentStock")}</h3>
 
-        <p className="mt-1 text-sm text-slate-500">Today's stock position</p>
+        <p className="mt-1 text-sm text-slate-500">{t("common.stockPositionToday")}</p>
       </div>
 
       <div className="overflow-x-auto">
@@ -70,7 +73,7 @@ function StockSummary({ stock = [] }) {
                   colSpan={6}
                   className="px-5 py-10 text-center text-slate-500"
                 >
-                  No stock recorded for today.
+                  {t("common.noStockForToday")}
                 </td>
               </tr>
             )}

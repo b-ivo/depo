@@ -2,9 +2,12 @@ import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { apiRequest, logout } from "../../services/api";
+import { useLanguage } from "../../i18n/context.js";
+import LanguageSwitcher from "../../i18n/LanguageSwitcher.jsx";
 
 function Header({ title, description, onMenuClick }) {
   const navigate = useNavigate();
+  const { t } = useLanguage();
 
   const [user, setUser] = useState(null);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,15 +15,22 @@ function Header({ title, description, onMenuClick }) {
   const menuRef = useRef(null);
 
   useEffect(() => {
+    let cancelled = false;
+
     const loadUser = async () => {
       try {
         const data = await apiRequest("/auth/me");
-        setUser(data.data);
+        if (!cancelled) setUser(data.data);
       } catch (error) {
         console.error("Failed to load user:", error);
       }
     };
+
     loadUser();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   useEffect(() => {
@@ -55,7 +65,7 @@ function Header({ title, description, onMenuClick }) {
           type="button"
           onClick={onMenuClick}
           className="mr-3 rounded-lg p-2 text-slate-600 hover:bg-slate-100 lg:hidden"
-          aria-label="Open navigation"
+          aria-label={t("nav.aria.openNavigation")}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -79,6 +89,9 @@ function Header({ title, description, onMenuClick }) {
 
       {/* Right side */}
       <div className="flex items-center gap-3">
+        {/* Language Switcher */}
+        <LanguageSwitcher className="hidden md:flex" />
+
         {/* Active Business Badge */}
         {user?.business && (
           <div className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 md:flex">
@@ -105,7 +118,7 @@ function Header({ title, description, onMenuClick }) {
             {/* User info */}
             <div className="hidden text-left sm:block">
               <p className="text-sm font-medium text-slate-900">
-                {user?.username || "User"}
+                {user?.username || t("auth.user")}
               </p>
               <p className="text-xs text-slate-500">
                 {user?.business ? user.business.name : (user?.email || "")}
@@ -137,7 +150,7 @@ function Header({ title, description, onMenuClick }) {
 
                 <div className="mt-2 flex flex-wrap items-center gap-1.5">
                   <span className="inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize text-blue-700">
-                    {user?.role}
+                    {t(`auth.role.${user?.role}`)}
                   </span>
                   {user?.business && (
                     <span className="inline-flex items-center gap-1 rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-xs font-medium text-emerald-700">
@@ -154,7 +167,7 @@ function Header({ title, description, onMenuClick }) {
                 className="flex w-full items-center px-4 py-3 text-left text-sm text-slate-700 hover:bg-slate-50"
               >
                 <span className="mr-3">👤</span>
-                My Profile
+                {t("auth.myProfile")}
               </button>
 
               {/* Logout */}
@@ -164,7 +177,7 @@ function Header({ title, description, onMenuClick }) {
                 className="flex w-full items-center border-t border-slate-100 px-4 py-3 text-left text-sm text-red-600 hover:bg-red-50"
               >
                 <span className="mr-3">🚪</span>
-                Logout
+                {t("auth.logout")}
               </button>
             </div>
           )}

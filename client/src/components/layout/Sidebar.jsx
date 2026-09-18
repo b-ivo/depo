@@ -1,21 +1,24 @@
 import { NavLink } from "react-router-dom";
-import { getCurrentUser, logout } from "../../services/api";
-
-const baseNavigation = [
-  { label: "Dashboard", path: "/" },
-  { label: "Daily Record", path: "/daily" },
-  { label: "History", path: "/history" },
-  { label: "Beer Management", path: "/beers" },
-  { label: "Inventory", path: "/inventory" },
-  { label: "Profile", path: "/profile" },
-];
+import { getCurrentUser } from "../../services/api";
+import { useLanguage } from "../../i18n/context.js";
+import LanguageSwitcher from "../../i18n/LanguageSwitcher.jsx";
 
 function Sidebar({ open, onClose }) {
+  const { t } = useLanguage();
   const user = getCurrentUser();
   const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
+  const baseNavigation = [
+    { label: t("nav.dashboard"), path: "/" },
+    { label: t("nav.dailyRecord"), path: "/daily" },
+    { label: t("nav.history"), path: "/history" },
+    { label: t("nav.beerManagement"), path: "/beers" },
+    { label: t("nav.inventory"), path: "/inventory" },
+    { label: t("nav.profile"), path: "/profile" },
+  ];
+
   const navigation = isAdmin
-    ? [...baseNavigation, { label: "Admin Hub", path: "/admin" }]
+    ? [...baseNavigation, { label: t("nav.adminHub"), path: "/admin" }]
     : baseNavigation;
 
   return (
@@ -24,7 +27,7 @@ function Sidebar({ open, onClose }) {
       {open && (
         <button
           type="button"
-          aria-label="Close navigation"
+          aria-label={t("nav.aria.closeNavigation")}
           onClick={onClose}
           className="fixed inset-0 z-40 bg-black/40 lg:hidden"
         />
@@ -40,13 +43,13 @@ function Sidebar({ open, onClose }) {
         {/* Brand */}
         <div className="flex h-16 items-center justify-between border-b border-slate-200 px-6">
           <div>
-            <h1 className="text-lg font-bold text-slate-900">Mini DEPO</h1>
+            <h1 className="text-lg font-bold text-slate-900">{t("app.title")}</h1>
             {user?.business ? (
               <p className="truncate text-xs font-medium text-emerald-600">
                 🏢 {user.business.name}
               </p>
             ) : (
-              <p className="text-xs text-slate-500">Management System</p>
+              <p className="text-xs text-slate-500">{t("app.tagline")}</p>
             )}
           </div>
 
@@ -55,7 +58,7 @@ function Sidebar({ open, onClose }) {
             type="button"
             onClick={onClose}
             className="rounded-lg p-2 text-slate-500 hover:bg-slate-100 lg:hidden"
-            aria-label="Close sidebar"
+            aria-label={t("nav.aria.closeSidebar")}
           >
             ✕
           </button>
@@ -85,12 +88,13 @@ function Sidebar({ open, onClose }) {
 
         {/* Footer */}
         <div className="border-t border-slate-200 p-4">
+          <LanguageSwitcher className="mb-3 w-full" />
           {user?.business?.location && (
             <p className="mb-1 truncate text-xs text-slate-400">
               📍 {user.business.location}
             </p>
           )}
-          <p className="text-xs text-slate-400">Mini DEPO</p>
+          <p className="text-xs text-slate-400">{t("app.title")}</p>
         </div>
       </aside>
     </>

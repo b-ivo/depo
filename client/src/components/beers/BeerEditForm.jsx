@@ -1,19 +1,14 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { updateBeer } from "../../services/beersApi";
+import { useLanguage } from "../../i18n/context.js";
 
 function BeerEditForm({ beer, onSuccess, onCancel }) {
-  const [name, setName] = useState("");
-  const [price, setPrice] = useState("");
+  const { t } = useLanguage();
+
+  const [name, setName] = useState(beer?.name || "");
+  const [price, setPrice] = useState(beer?.price ?? "");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-
-  useEffect(() => {
-    if (beer) {
-      setName(beer.name || "");
-      setPrice(beer.price ?? "");
-      setError("");
-    }
-  }, [beer]);
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -24,12 +19,12 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
     const numericPrice = Number(price);
 
     if (!trimmedName) {
-      setError("Beer name is required.");
+      setError(t("beers.nameRequired"));
       return;
     }
 
     if (price === "" || !Number.isFinite(numericPrice) || numericPrice < 0) {
-      setError("Price must be a valid non-negative number.");
+      setError(t("beers.priceInvalid"));
       return;
     }
 
@@ -43,7 +38,7 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
 
       onSuccess?.(response.data);
     } catch (error) {
-      setError(error.message || "Failed to update beer.");
+      setError(error.message || t("beers.updateFailed"));
     } finally {
       setLoading(false);
     }
@@ -52,10 +47,10 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-5">
-        <h2 className="text-lg font-semibold text-slate-900">Edit Beer</h2>
+        <h2 className="text-lg font-semibold text-slate-900">{t("beers.editTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Update the beer name or selling price.
+          {t("beers.editDesc")}
         </p>
       </div>
 
@@ -71,7 +66,7 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
             htmlFor="edit-beer-name"
             className="mb-1.5 block text-sm font-medium text-slate-700"
           >
-            Beer Name
+            {t("beers.beerName")}
           </label>
 
           <input
@@ -89,7 +84,7 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
             htmlFor="edit-beer-price"
             className="mb-1.5 block text-sm font-medium text-slate-700"
           >
-            Price per Crate
+            {t("beers.pricePerCrate")}
           </label>
 
           <input
@@ -111,7 +106,7 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
             disabled={loading}
             className="rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50 disabled:opacity-50"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
 
           <button
@@ -119,7 +114,7 @@ function BeerEditForm({ beer, onSuccess, onCancel }) {
             disabled={loading}
             className="rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Save Changes"}
+            {loading ? t("common.saving") : t("beers.saveChanges")}
           </button>
         </div>
       </form>

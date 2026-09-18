@@ -1,59 +1,61 @@
 import { NavLink } from "react-router-dom";
+import { useLanguage } from "../i18n/context.js";
 
 function Sidebar({ user }) {
+  const { t } = useLanguage();
   const isSuperAdmin = user?.role === "superadmin";
   const isAdmin = user?.role === "admin";
 
   const superAdminLinks = [
     {
-      name: "Dashboard",
+      name: t("nav.dashboard"),
       path: "/superadmin",
     },
     {
-      name: "Businesses",
+      name: t("nav.businesses"),
       path: "/superadmin/businesses",
     },
     {
-      name: "Users",
+      name: t("nav.users"),
       path: "/superadmin/users",
     },
     {
-      name: "Profile",
+      name: t("nav.profile"),
       path: "/superadmin/profile",
     },
   ];
 
   const adminLinks = [
     {
-      name: "Dashboard",
+      name: t("nav.dashboard"),
       path: "/admin",
     },
     {
-      name: "Daily Overview",
+      name: t("nav.dailyOverview"),
       path: "/admin/dashboard",
     },
     {
-      name: "Daily Record",
+      name: t("nav.dailyRecord"),
       path: "/admin/daily",
     },
     {
-      name: "History",
+      name: t("nav.history"),
       path: "/admin/history",
     },
     {
-      name: "Beers",
+      name: t("nav.beers"),
       path: "/admin/beers",
     },
     {
-      name: "Inventory",
+      name: t("nav.inventory"),
       path: "/admin/inventory",
     },
     {
-      name: "Users",
+      name: t("nav.users"),
       path: "/admin/users",
     },
     {
-      name: "Profile",
+      name: t("nav.profile"),
       path: "/admin/profile",
     },
   ];
@@ -66,25 +68,18 @@ function Sidebar({ user }) {
 
   return (
     <aside className="hidden h-screen w-64 shrink-0 flex-col bg-slate-950 text-white md:flex">
-      {/* =========================
-          LOGO
-      ========================= */}
       <div className="border-b border-slate-800 px-6 py-5">
         <h1 className="text-xl font-bold">
           Mini DEPO
         </h1>
 
         <p className="mt-1 text-xs text-slate-400">
-          Administration Portal
+          {t("portal.logoSubtitle")}
         </p>
       </div>
 
-      {/* =========================
-          USER INFO
-      ========================= */}
       <div className="border-b border-slate-800 px-5 py-4">
         <div className="flex items-center gap-3">
-          {/* Avatar */}
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-800 text-sm font-semibold">
             {user?.username?.charAt(0).toUpperCase()}
           </div>
@@ -95,18 +90,15 @@ function Sidebar({ user }) {
             </p>
 
             <p className="mt-1 text-xs capitalize text-slate-400">
-              {user?.role}
+              {t(`auth.role.${user?.role}`)}
             </p>
           </div>
         </div>
       </div>
 
-      {/* =========================
-          NAVIGATION
-      ========================= */}
       <nav className="flex-1 overflow-y-auto px-3 py-5">
         <p className="mb-3 px-3 text-xs font-semibold uppercase tracking-wider text-slate-500">
-          Menu
+          {t("nav.menu")}
         </p>
 
         <div className="space-y-1">
@@ -132,12 +124,9 @@ function Sidebar({ user }) {
         </div>
       </nav>
 
-      {/* =========================
-          FOOTER
-      ========================= */}
       <div className="border-t border-slate-800 px-5 py-4">
         <p className="text-xs text-slate-500">
-          Mini DEPO © 2026
+          {t("portal.footer")}
         </p>
       </div>
     </aside>

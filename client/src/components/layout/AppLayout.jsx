@@ -4,7 +4,7 @@ import Sidebar from "./Sidebar";
 import Header from "./Header";
 import PageContainer from "./PageContainer";
 
-function AppLayout({ children, title, description, activePath }) {
+function AppLayout({ children, title, description }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
   return (

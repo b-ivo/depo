@@ -1,45 +1,54 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import { getDailyRecord } from "../services/daysApi";
 import { formatCurrency } from "../utils/formatCurrency";
+import { useLanguage } from "../i18n/context.js";
 
 function DailyHistoryDetail() {
+  const { t } = useLanguage();
   const { id } = useParams();
   const navigate = useNavigate();
 
   const [day, setDay] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-
-  async function loadDay() {
-    try {
-      setLoading(true);
-      setError("");
-
-      const response = await getDailyRecord(id);
-
-      setDay(response.data);
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  }
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    loadDay();
-  }, [id]);
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+
+        const response = await getDailyRecord(id);
+
+        if (!cancelled) setDay(response.data);
+      } catch (error) {
+        if (!cancelled) setError(error.message);
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [id, reloadKey]);
 
   if (loading) {
     return (
       <AppLayout
-        title="Daily History"
-        description="Detailed business day record"
+        title={t("historyDetail.title")}
+        description={t("historyDetail.description")}
         activePath="/history"
       >
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
-          <p className="text-sm text-slate-500">Loading daily record...</p>
+          <p className="text-sm text-slate-500">{t("historyDetail.loading")}</p>
         </div>
       </AppLayout>
     );
@@ -48,8 +57,8 @@ function DailyHistoryDetail() {
   if (error) {
     return (
       <AppLayout
-        title="Daily History"
-        description="Detailed business day record"
+        title={t("historyDetail.title")}
+        description={t("historyDetail.description")}
         activePath="/history"
       >
         <div className="rounded-xl border border-red-200 bg-red-50 p-5">
@@ -57,10 +66,10 @@ function DailyHistoryDetail() {
 
           <button
             type="button"
-            onClick={loadDay}
+            onClick={() => setReloadKey((key) => key + 1)}
             className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
           >
-            Try Again
+            {t("common.tryAgain")}
           </button>
         </div>
       </AppLayout>
@@ -73,8 +82,8 @@ function DailyHistoryDetail() {
 
   return (
     <AppLayout
-      title="Daily History"
-      description="Detailed business day record"
+      title={t("historyDetail.title")}
+      description={t("historyDetail.description")}
       activePath="/history"
     >
       <div className="space-y-6">
@@ -84,14 +93,14 @@ function DailyHistoryDetail() {
           onClick={() => navigate("/history")}
           className="text-sm font-medium text-slate-600 hover:text-slate-900"
         >
-          ← Back to History
+          {t("historyDetail.backToHistory")}
         </button>
 
         {/* Day summary */}
         <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500">Business Day</p>
+              <p className="text-sm text-slate-500">{t("common.businessDay")}</p>
 
               <h1 className="mt-1 text-xl font-bold text-slate-900">
                 {new Date(day.date).toLocaleDateString("en-RW", {
@@ -111,25 +120,25 @@ function DailyHistoryDetail() {
                     : "bg-blue-100 text-blue-700"
               }`}
             >
-              {day.status}
+              {t(`status.${day.status}`)}
             </span>
           </div>
 
           <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-            <SummaryCard label="Total Sold" value={day.totals?.sold ?? 0} />
+            <SummaryCard label={t("dashboard.totalSold")} value={day.totals?.sold ?? 0} />
 
             <SummaryCard
-              label="Expected Sales"
+              label={t("common.expectedSales")}
               value={formatCurrency(day.totals?.expectedSales)}
             />
 
             <SummaryCard
-              label="Expected Cash"
+              label={t("common.expectedCash")}
               value={formatCurrency(day.totals?.expectedCash)}
             />
 
             <SummaryCard
-              label="Difference"
+              label={t("common.difference")}
               value={formatCurrency(day.difference)}
             />
           </div>
@@ -138,10 +147,10 @@ function DailyHistoryDetail() {
         {/* Stock detail */}
         <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold text-slate-900">Stock Details</h2>
+            <h2 className="font-semibold text-slate-900">{t("historyDetail.stockDetails")}</h2>
 
             <p className="mt-1 text-sm text-slate-500">
-              Detailed stock movement for every beer.
+              {t("historyDetail.stockDetailsDesc")}
             </p>
           </div>
 
@@ -225,22 +234,22 @@ function DailyHistoryDetail() {
         {/* Payment details */}
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
           <div className="border-b border-slate-200 px-5 py-4">
-            <h2 className="font-semibold text-slate-900">Payment Details</h2>
+            <h2 className="font-semibold text-slate-900">{t("historyDetail.paymentDetails")}</h2>
           </div>
 
           <div className="grid gap-4 p-5 sm:grid-cols-3">
             <SummaryCard
-              label="Mobile Money"
+              label={t("common.mobileMoney")}
               value={formatCurrency(day.payments?.mobileMoney ?? 0)}
             />
 
             <SummaryCard
-              label="Expected Cash"
+              label={t("common.expectedCash")}
               value={formatCurrency(day.totals?.expectedCash)}
             />
 
             <SummaryCard
-              label="Actual Cash"
+              label={t("common.actualCash")}
               value={formatCurrency(day.payments?.actualCash)}
             />
           </div>

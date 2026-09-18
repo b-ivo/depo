@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 
 import AppLayout from "../components/layout/AppLayout";
 import InventoryTable from "../components/inventory/InventoryTable";
@@ -13,7 +13,11 @@ import {
   getDailyMovements,
 } from "../services/inventoryApi";
 
+import { useLanguage } from "../i18n/context.js";
+
 function InventoryManagement() {
+  const { t } = useLanguage();
+
   const [movements, setMovements] = useState([]);
   const [beers, setBeers] = useState([]);
 
@@ -22,47 +26,60 @@ function InventoryManagement() {
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [reloadKey, setReloadKey] = useState(0);
 
-  const loadBeers = useCallback(async () => {
-    try {
-      const response = await getBeers();
+  useEffect(() => {
+    let cancelled = false;
 
-      setBeers(response.data || []);
-    } catch (error) {
-      console.error("Failed to load beers:", error);
-    }
+    const loadBeers = async () => {
+      try {
+        const response = await getBeers();
+
+        if (!cancelled) setBeers(response.data || []);
+      } catch (error) {
+        console.error("Failed to load beers:", error);
+      }
+    };
+
+    loadBeers();
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
-  const loadMovements = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
+  useEffect(() => {
+    let cancelled = false;
 
-      let response;
+    const loadMovements = async () => {
+      try {
+        setLoading(true);
+        setError("");
 
-      if (selectedBeer) {
-        response = await getBeerMovements(selectedBeer);
-      } else if (selectedDate) {
-        response = await getDailyMovements(selectedDate);
-      } else {
-        response = await getInventoryMovements();
+        let response;
+
+        if (selectedBeer) {
+          response = await getBeerMovements(selectedBeer);
+        } else if (selectedDate) {
+          response = await getDailyMovements(selectedDate);
+        } else {
+          response = await getInventoryMovements();
+        }
+
+        if (!cancelled) setMovements(response.data || []);
+      } catch (error) {
+        if (!cancelled) setError(error.message || t("inventory.failedToLoad"));
+      } finally {
+        if (!cancelled) setLoading(false);
       }
+    };
 
-      setMovements(response.data || []);
-    } catch (error) {
-      setError(error.message || "Failed to load inventory movements.");
-    } finally {
-      setLoading(false);
-    }
-  }, [selectedBeer, selectedDate]);
-
-  useEffect(() => {
-    loadBeers();
-  }, [loadBeers]);
-
-  useEffect(() => {
     loadMovements();
-  }, [loadMovements]);
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedBeer, selectedDate, reloadKey, t]);
 
   function handleBeerChange(value) {
     setSelectedBeer(value);
@@ -79,8 +96,8 @@ function InventoryManagement() {
 
   return (
     <AppLayout
-      title="Inventory"
-      description="Track inventory movements"
+      title={t("inventory.title")}
+      description={t("inventory.description")}
       activePath="/inventory"
     >
       <div className="space-y-6">
@@ -96,17 +113,17 @@ function InventoryManagement() {
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-5">
             <h2 className="font-semibold text-red-800">
-              Unable to load inventory
+              {t("inventory.unableToLoad")}
             </h2>
 
             <p className="mt-1 text-sm text-red-600">{error}</p>
 
             <button
               type="button"
-              onClick={loadMovements}
+              onClick={() => setReloadKey((key) => key + 1)}
               className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         )}
@@ -114,7 +131,7 @@ function InventoryManagement() {
         {!error && loading && (
           <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
             <p className="text-sm text-slate-500">
-              Loading inventory movements...
+              {t("inventory.loadingMovements")}
             </p>
           </div>
         )}

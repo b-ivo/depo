@@ -1,4 +1,8 @@
+import { useLanguage } from "../i18n/context.js";
+
 function Modal({ title, onClose, children }) {
+  const { t } = useLanguage();
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 p-4">
       <div className="w-full max-w-md rounded-xl bg-white shadow-xl">
@@ -10,7 +14,7 @@ function Modal({ title, onClose, children }) {
           <button
             type="button"
             onClick={onClose}
-            aria-label="Close"
+            aria-label={t("common.close")}
             className="rounded p-1 text-slate-400 transition hover:bg-slate-100 hover:text-slate-600"
           >
             <span className="block text-xl leading-none">×</span>

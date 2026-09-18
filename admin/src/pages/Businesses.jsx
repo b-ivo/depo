@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import Modal from "../components/Modal";
+import { useLanguage } from "../i18n/context.js";
 
 function Businesses() {
+  const { t } = useLanguage();
   const [businesses, setBusinesses] = useState([]);
 
   const [loading, setLoading] = useState(true);
@@ -29,9 +31,9 @@ function Businesses() {
 
         setBusinesses(res.data.data);
       } catch (err) {
-        setError(
-          err.response?.data?.message || "Failed to load businesses.",
-        );
+      setError(
+        err.response?.data?.message || t("businesses.failedToLoad"),
+      );
       } finally {
         setLoading(false);
       }
@@ -72,7 +74,7 @@ function Businesses() {
       setShowAdd(false);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to create business.",
+        err.response?.data?.message || t("businesses.createFailed"),
       );
     } finally {
       setBusy(false);
@@ -100,7 +102,7 @@ function Businesses() {
       setEditing(null);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to update business.",
+        err.response?.data?.message || t("businesses.updateFailed"),
       );
     } finally {
       setBusy(false);
@@ -128,7 +130,7 @@ function Businesses() {
       setConfirmBusiness(null);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to update business.",
+        err.response?.data?.message || t("businesses.updateFailed"),
       );
     } finally {
       setBusy(false);
@@ -144,7 +146,7 @@ function Businesses() {
   if (loading) {
     return (
       <div className="flex min-h-full items-center justify-center p-8">
-        <p className="text-sm text-slate-500">Loading businesses...</p>
+        <p className="text-sm text-slate-500">{t("businesses.loading")}</p>
       </div>
     );
   }
@@ -154,16 +156,16 @@ function Businesses() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
-            Businesses
+            {t("businesses.title")}
           </h1>
 
           <p className="mt-1 text-sm text-slate-500">
-            Manage the depots connected to Mini DEPO.
+            {t("businesses.description")}
           </p>
         </div>
 
         <button onClick={openAdd} className={buttonClass}>
-          New business
+          {t("businesses.new")}
         </button>
       </div>
 
@@ -179,19 +181,19 @@ function Businesses() {
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
                 <th className="px-6 py-4 font-medium text-slate-500">
-                  Name
+                  {t("common.name")}
                 </th>
 
                 <th className="px-6 py-4 font-medium text-slate-500">
-                  Location
+                  {t("common.location")}
                 </th>
 
                 <th className="px-6 py-4 font-medium text-slate-500">
-                  Status
+                  {t("common.status")}
                 </th>
 
                 <th className="px-6 py-4 font-medium text-slate-500">
-                  Actions
+                  {t("common.actions")}
                 </th>
               </tr>
             </thead>
@@ -218,7 +220,7 @@ function Businesses() {
                           : "bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {business.active ? "Active" : "Inactive"}
+                      {business.active ? t("common.active") : t("common.inactive")}
                     </span>
                   </td>
 
@@ -242,7 +244,9 @@ function Businesses() {
                             : "border-green-200 text-green-600 hover:bg-green-50"
                         }`}
                       >
-                        {business.active ? "Deactivate" : "Activate"}
+                        {business.active
+                      ? t("common.deactivate")
+                      : t("common.activate")}
                       </button>
                     </div>
                   </td>
@@ -255,7 +259,7 @@ function Businesses() {
                     colSpan="4"
                     className="px-6 py-8 text-center text-slate-500"
                   >
-                    No businesses found.
+                    {t("businesses.noFound")}
                   </td>
                 </tr>
               )}
@@ -266,7 +270,7 @@ function Businesses() {
 
       {showAdd && (
         <Modal
-          title="New business"
+          title={t("businesses.new")}
           onClose={() => setShowAdd(false)}
         >
           <form onSubmit={handleCreate} className="space-y-5">
@@ -278,7 +282,7 @@ function Businesses() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Name
+                {t("common.name")}
               </label>
 
               <input
@@ -292,13 +296,13 @@ function Businesses() {
                 }
                 required
                 className={inputClass}
-                placeholder="e.g. Kampala Main Depot"
+                placeholder={t("businesses.namePlaceholder")}
               />
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Location
+                {t("common.location")}
               </label>
 
               <input
@@ -312,7 +316,7 @@ function Businesses() {
                 }
                 required
                 className={inputClass}
-                placeholder="e.g. Kampala"
+                placeholder={t("businesses.locationPlaceholder")}
               />
             </div>
 
@@ -322,7 +326,7 @@ function Businesses() {
                 onClick={() => setShowAdd(false)}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
 
               <button
@@ -330,7 +334,7 @@ function Businesses() {
                 disabled={busy}
                 className={buttonClass}
               >
-                {busy ? "Creating..." : "Create business"}
+                {busy ? t("businesses.creating") : t("businesses.create")}
               </button>
             </div>
           </form>
@@ -339,7 +343,7 @@ function Businesses() {
 
       {editing && (
         <Modal
-          title="Edit business"
+          title={t("businesses.editTitle")}
           onClose={() => setEditing(null)}
         >
           <form onSubmit={handleUpdate} className="space-y-5">
@@ -351,7 +355,7 @@ function Businesses() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Name
+                {t("common.name")}
               </label>
 
               <input
@@ -367,7 +371,7 @@ function Businesses() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Location
+                {t("common.location")}
               </label>
 
               <input
@@ -387,7 +391,7 @@ function Businesses() {
                 onClick={() => setEditing(null)}
                 className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
 
               <button
@@ -395,7 +399,7 @@ function Businesses() {
                 disabled={busy}
                 className={buttonClass}
               >
-                {busy ? "Saving..." : "Save changes"}
+                {busy ? t("common.saving") : t("businesses.saveChanges")}
               </button>
             </div>
           </form>
@@ -406,8 +410,8 @@ function Businesses() {
         <Modal
           title={
             confirmBusiness.active
-              ? "Deactivate business"
-              : "Activate business"
+              ? t("businesses.deactivateTitle")
+              : t("businesses.activateTitle")
           }
           onClose={() => setConfirmBusiness(null)}
         >
@@ -438,7 +442,7 @@ function Businesses() {
               onClick={() => setConfirmBusiness(null)}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
 
             <button
@@ -451,7 +455,7 @@ function Businesses() {
                   : "bg-green-600 hover:bg-green-700"
               }`}
             >
-              {busy ? "Saving..." : "Confirm"}
+                {busy ? t("common.saving") : t("common.confirm")}
             </button>
           </div>
         </Modal>

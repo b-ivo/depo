@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 
 import AppLayout from "../components/layout/AppLayout";
@@ -7,45 +7,61 @@ import DashboardSummary from "../components/dashboard/DashboardSummary";
 import StockOverview from "../components/dashboard/StockOverview";
 
 import { getCurrentDay } from "../services/daysApi";
+import { useLanguage } from "../i18n/context.js";
 
 function Dashboard() {
+  const { t } = useLanguage();
+
   const [day, setDay] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [errorCode, setErrorCode] = useState("");
-
-  const loadDashboard = useCallback(async () => {
-    try {
-      setLoading(true);
-      setError("");
-      setErrorCode("");
-
-      const response = await getCurrentDay();
-
-      setDay(response.data);
-    } catch (error) {
-      setDay(null);
-      setError(error.message || "Failed to load dashboard.");
-      setErrorCode(error.code || "");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
-    loadDashboard();
-  }, [loadDashboard]);
+    let cancelled = false;
+
+    const load = async () => {
+      try {
+        setLoading(true);
+        setError("");
+        setErrorCode("");
+
+        const response = await getCurrentDay();
+
+        if (!cancelled) {
+          setDay(response.data);
+        }
+      } catch (error) {
+        if (!cancelled) {
+          setDay(null);
+          setError(error.message || t("dashboard.unableToLoad"));
+          setErrorCode(error.code || "");
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
+      }
+    };
+
+    load();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [reloadKey, t]);
 
   return (
     <AppLayout
-      title="Dashboard"
-      description="Overview of today's business"
+      title={t("dashboard.title")}
+      description={t("dashboard.description")}
       activePath="/"
     >
       {/* Loading */}
       {loading && (
         <div className="flex min-h-64 items-center justify-center rounded-xl border border-slate-200 bg-white">
-          <p className="text-sm text-slate-500">Loading dashboard...</p>
+          <p className="text-sm text-slate-500">{t("dashboard.loading")}</p>
         </div>
       )}
 
@@ -53,18 +69,18 @@ function Dashboard() {
       {!loading && errorCode === "NO_OPEN_DAY" && (
         <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
           <h2 className="text-xl font-semibold text-slate-900">
-            Business Day Not Started
+            {t("dashboard.businessDayNotStarted")}
           </h2>
 
           <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-            Start today's business day before managing stock and sales.
+            {t("dashboard.startBeforeManaging")}
           </p>
 
           <Link
             to="/daily"
             className="mt-6 inline-block rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
           >
-            Start Business Day
+            {t("daily.startBusinessDay")}
           </Link>
         </div>
       )}
@@ -77,19 +93,18 @@ function Dashboard() {
           </div>
 
           <h2 className="mt-4 text-xl font-semibold text-slate-900">
-            Business Day Closed
+            {t("dashboard.businessDayClosed")}
           </h2>
 
           <p className="mx-auto mt-2 max-w-md text-sm text-slate-500">
-            Today's business day has already been completed. You can review the
-            complete record in History.
+            {t("dashboard.alreadyCompleted")}
           </p>
 
           <Link
             to="/history"
             className="mt-6 inline-block rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
           >
-            View History
+            {t("dashboard.viewHistory")}
           </Link>
         </div>
       )}
@@ -101,17 +116,17 @@ function Dashboard() {
         errorCode !== "DAY_ALREADY_CLOSED" && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-6">
             <h2 className="font-semibold text-red-800">
-              Unable to Load Dashboard
+              {t("dashboard.unableToLoad")}
             </h2>
 
             <p className="mt-2 text-sm text-red-600">{error}</p>
 
             <button
               type="button"
-              onClick={loadDashboard}
+              onClick={() => setReloadKey((key) => key + 1)}
               className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         )}
@@ -131,7 +146,7 @@ function Dashboard() {
           {/* Quick actions */}
           <div>
             <h2 className="mb-3 text-lg font-semibold text-slate-900">
-              Quick Actions
+              {t("dashboard.quickActions")}
             </h2>
 
             <div className="flex flex-wrap gap-3">
@@ -139,14 +154,14 @@ function Dashboard() {
                 to="/daily"
                 className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
               >
-                Manage Today's Record
+                {t("dashboard.manageTodaysRecord")}
               </Link>
 
               <Link
                 to="/history"
                 className="rounded-lg border border-slate-300 bg-white px-5 py-2.5 text-sm font-medium text-slate-700 transition hover:bg-slate-50"
               >
-                View History
+                {t("dashboard.viewHistory")}
               </Link>
             </div>
           </div>

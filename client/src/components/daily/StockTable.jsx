@@ -1,7 +1,9 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import { useLanguage } from "../../i18n/context.js";
 import { updateFulfillment } from "../../services/daysApi";
 
 function StockTable({ stock = [], onSuccess }) {
+  const { t } = useLanguage();
   const [editingBeer, setEditingBeer] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [saving, setSaving] = useState(false);
@@ -23,7 +25,7 @@ function StockTable({ stock = [], onSuccess }) {
     const value = Number(quantity);
 
     if (!Number.isInteger(value) || value < 0) {
-      setError("Quantity must be a non-negative whole number.");
+      setError(t("daily.quantityNonNegative"));
       return;
     }
 
@@ -49,10 +51,10 @@ function StockTable({ stock = [], onSuccess }) {
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="font-semibold text-slate-900">Today's Stock</h2>
+        <h2 className="font-semibold text-slate-900">{t("common.todaysStock")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Current stock position for each beer.
+          {t("daily.stockTableDesc")}
         </p>
       </div>
 
@@ -150,7 +152,7 @@ function StockTable({ stock = [], onSuccess }) {
                           disabled={saving}
                           className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
                         >
-                          {saving ? "Saving..." : "Save"}
+                          {saving ? t("common.saving") : t("common.save")}
                         </button>
 
                         <button
@@ -171,7 +173,7 @@ function StockTable({ stock = [], onSuccess }) {
                         Edit
                       </button>
                     ) : (
-                      <span className="text-xs text-slate-400">Locked</span>
+                      <span className="text-xs text-slate-400">{t("common.locked")}</span>
                     )}
                   </td>
                 </tr>
@@ -184,7 +186,7 @@ function StockTable({ stock = [], onSuccess }) {
                   colSpan="7"
                   className="px-5 py-10 text-center text-slate-500"
                 >
-                  No stock recorded.
+                  {t("common.noStockRecorded")}
                 </td>
               </tr>
             )}

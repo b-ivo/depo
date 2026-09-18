@@ -4,19 +4,32 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 import Business from "../models/Business.js";
 import authMiddleware from "../middleware/auth.js";
+import loginRateLimit from "../middleware/loginRateLimit.js";
 
 const router = express.Router();
+
+// Used to keep login timing consistent when the email does not exist.
+// This is a throwaway hash, not a real account password.
+const DUMMY_PASSWORD_HASH = bcrypt.hashSync(
+  "invalid-placeholder-password",
+  12,
+);
 
 // ================================
 // LOGIN
 // POST /api/auth/login
 // ================================
-router.post("/login", async (req, res) => {
+router.post("/login", loginRateLimit, async (req, res) => {
   try {
     const { email, password } = req.body;
 
     // Validate input
-    if (!email || !password) {
+    if (
+      !email ||
+      !password ||
+      typeof email !== "string" ||
+      typeof password !== "string"
+    ) {
       return res.status(400).json({
         success: false,
         message: "Email and password are required.",
@@ -29,6 +42,9 @@ router.post("/login", async (req, res) => {
     });
 
     if (!user) {
+      // Run a dummy compare so missing emails take a similar time.
+      await bcrypt.compare(password, DUMMY_PASSWORD_HASH);
+
       return res.status(401).json({
         success: false,
         message: "Invalid email or password.",
@@ -238,7 +254,10 @@ router.patch("/change-password", authMiddleware, async (req, res) => {
     }
 
     // Validate new password length
-    if (newPassword.length < 8) {
+    if (
+      typeof newPassword !== "string" ||
+      newPassword.length < 8
+    ) {
       return res.status(400).json({
         success: false,
         message: "New password must be at least 8 characters.",

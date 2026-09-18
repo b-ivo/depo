@@ -6,6 +6,7 @@ import InventoryFilters from "../components/inventory/InventoryFilters";
 import InventorySummary from "../components/inventory/InventorySummary";
 
 import { getBeers } from "../services/beersApi";
+import { useLanguage } from "../i18n/context.js";
 
 import {
   getInventoryMovements,
@@ -14,6 +15,7 @@ import {
 } from "../services/inventoryApi";
 
 function InventoryManagement() {
+  const { t } = useLanguage();
   const [movements, setMovements] = useState([]);
   const [beers, setBeers] = useState([]);
 
@@ -69,7 +71,7 @@ function InventoryManagement() {
         }
       } catch (error) {
         if (!cancelled) {
-          setError(error.message || "Failed to load inventory movements.");
+          setError(error.message || t("inventory.failedToLoad"));
         }
       } finally {
         if (!cancelled) {
@@ -83,7 +85,7 @@ function InventoryManagement() {
     return () => {
       cancelled = true;
     };
-  }, [selectedBeer, selectedDate, reloadKey]);
+  }, [selectedBeer, selectedDate, reloadKey, t]);
 
   function handleBeerChange(value) {
     setSelectedBeer(value);
@@ -100,8 +102,8 @@ function InventoryManagement() {
 
   return (
     <AppLayout
-      title="Inventory"
-      description="Track inventory movements"
+      title={t("inventory.title")}
+      description={t("inventory.description")}
       activePath="/admin/inventory"
     >
       <div className="space-y-6">
@@ -117,7 +119,7 @@ function InventoryManagement() {
         {error && (
           <div className="rounded-xl border border-red-200 bg-red-50 p-5">
             <h2 className="font-semibold text-red-800">
-              Unable to load inventory
+              {t("inventory.unableToLoad")}
             </h2>
 
             <p className="mt-1 text-sm text-red-600">{error}</p>
@@ -127,7 +129,7 @@ function InventoryManagement() {
               onClick={() => setReloadKey((key) => key + 1)}
               className="mt-4 rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white"
             >
-              Try Again
+              {t("common.tryAgain")}
             </button>
           </div>
         )}
@@ -135,7 +137,7 @@ function InventoryManagement() {
         {!error && loading && (
           <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
             <p className="text-sm text-slate-500">
-              Loading inventory movements...
+              {t("inventory.loadingMovements")}
             </p>
           </div>
         )}

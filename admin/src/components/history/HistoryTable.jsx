@@ -1,6 +1,8 @@
-import { formatCurrency } from "../../utils/formatCurrency";
+﻿import { formatCurrency } from "../../utils/formatCurrency";
+import { useLanguage } from "../../i18n/context.js";
 
 function HistoryTable({ days = [], onSelect }) {
+  const { t } = useLanguage();
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="overflow-x-auto">
@@ -88,7 +90,7 @@ function HistoryTable({ days = [], onSelect }) {
                           : "bg-blue-100 text-blue-700"
                     }`}
                   >
-                    {day.status}
+                    {t(`status.${day.status}`)}
                   </span>
                 </td>
 
@@ -110,7 +112,7 @@ function HistoryTable({ days = [], onSelect }) {
                   colSpan="8"
                   className="px-5 py-12 text-center text-slate-500"
                 >
-                  No completed business days yet.
+                  {t("history.noCompletedDays")}
                 </td>
               </tr>
             )}

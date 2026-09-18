@@ -2,9 +2,9 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
 import { getCurrentUser } from "../services/api";
-import { apiRequest } from "../services/api";
 import { getCurrentDay } from "../services/daysApi";
 import { getBeers } from "../services/beersApi";
+import { useLanguage } from "../i18n/context.js";
 
 function StatCard({ label, value, sub, color = "slate" }) {
   const colors = {
@@ -23,6 +23,7 @@ function StatCard({ label, value, sub, color = "slate" }) {
 }
 
 function AdminDashboard() {
+  const { t } = useLanguage();
   const user = getCurrentUser();
   const [dayStatus, setDayStatus] = useState("loading");
   const [beerCount, setBeerCount] = useState(null);
@@ -48,29 +49,29 @@ function AdminDashboard() {
   }, []);
 
   const dayStatusBadge = {
-    open: { label: "Open", cls: "bg-emerald-100 text-emerald-700" },
-    closed: { label: "Closed", cls: "bg-slate-100 text-slate-600" },
-    not_started: { label: "Not Started", cls: "bg-amber-100 text-amber-700" },
-    loading: { label: "Loading...", cls: "bg-slate-100 text-slate-500" },
-    error: { label: "Unknown", cls: "bg-red-100 text-red-600" },
+    open: { label: t("common.open"), cls: "bg-emerald-100 text-emerald-700" },
+    closed: { label: t("common.closed"), cls: "bg-slate-100 text-slate-600" },
+    not_started: { label: t("common.notStarted"), cls: "bg-amber-100 text-amber-700" },
+    loading: { label: t("common.loading"), cls: "bg-slate-100 text-slate-500" },
+    error: { label: t("common.unknown"), cls: "bg-red-100 text-red-600" },
   }[dayStatus];
 
   const quickActions = [
-    { label: "Daily Record", icon: "📋", to: "/daily", desc: "Manage today's stock & sales" },
-    { label: "Beer Management", icon: "🍺", to: "/beers", desc: "Add, edit, or deactivate beers" },
-    { label: "Inventory", icon: "📦", to: "/inventory", desc: "Track fulfillment movements" },
-    { label: "History", icon: "📅", to: "/history", desc: "Review completed business days" },
+    { label: t("nav.dailyRecord"), icon: "📋", to: "/daily", desc: t("dashboard.dailyRecordDesc") },
+    { label: t("nav.beerManagement"), icon: "🍺", to: "/beers", desc: t("dashboard.beerManagementDesc") },
+    { label: t("nav.inventory"), icon: "📦", to: "/inventory", desc: t("dashboard.inventoryDesc") },
+    { label: t("nav.history"), icon: "📅", to: "/history", desc: t("dashboard.historyDesc") },
   ];
 
   return (
-    <AppLayout title="Admin Hub" description="Business control centre" activePath="/admin">
+    <AppLayout title={t("dashboard.adminTitle")} description={t("dashboard.adminDescription")} activePath="/admin">
       <div className="space-y-6">
 
         {/* Business Profile */}
         <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div>
-              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">Active Business</p>
+              <p className="text-xs font-medium uppercase tracking-wide text-slate-500">{t("dashboard.activeBusiness")}</p>
               <h2 className="mt-1 text-2xl font-bold text-slate-900">
                 {user?.business?.name || "—"}
               </h2>
@@ -83,10 +84,10 @@ function AdminDashboard() {
             </div>
 
             <div className="text-right">
-              <p className="text-xs text-slate-400">Logged in as</p>
+              <p className="text-xs text-slate-400">{t("auth.loggedInAs")}</p>
               <p className="text-sm font-semibold text-slate-900">{user?.username}</p>
               <span className="mt-1 inline-flex rounded-full bg-blue-100 px-2.5 py-0.5 text-xs font-medium capitalize text-blue-700">
-                {user?.role}
+                {t(`auth.role.${user?.role}`)}
               </span>
             </div>
           </div>
@@ -95,7 +96,7 @@ function AdminDashboard() {
         {/* KPI Stats */}
         <div className="grid gap-4 sm:grid-cols-3">
           <StatCard
-            label="Today's Day Status"
+            label={t("dashboard.todaysDayStatus")}
             value={
               <span className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-semibold ${dayStatusBadge.cls}`}>
                 {dayStatusBadge.label}
@@ -103,25 +104,25 @@ function AdminDashboard() {
             }
           />
           <StatCard
-            label="Active Beers"
+            label={t("dashboard.activeBeers")}
             value={beerCount ?? "—"}
-            sub="In your catalogue"
+            sub={t("dashboard.inYourCatalogue")}
             color="blue"
           />
           {dayData && dayStatus === "open" ? (
             <StatCard
-              label="Crates Sold Today"
+              label={t("dashboard.cratesSoldToday")}
               value={dayData.totals?.sold ?? "—"}
               sub={dayData.totals?.expectedSales
-                ? `${(dayData.totals.expectedSales / 1000).toFixed(0)}k RWF expected`
-                : "Evening stock not recorded"}
+                ? t("dashboard.expectedInThousands", { value: (dayData.totals.expectedSales / 1000).toFixed(0) })
+                : t("dashboard.eveningStockNotRecorded")}
               color="green"
             />
           ) : (
             <StatCard
-              label="Crates Sold Today"
+              label={t("dashboard.cratesSoldToday")}
               value="—"
-              sub={dayStatus === "closed" ? "Day is closed" : "Day not open"}
+              sub={dayStatus === "closed" ? t("dashboard.dayIsClosed") : t("dashboard.dayNotOpen")}
             />
           )}
         </div>
@@ -129,7 +130,7 @@ function AdminDashboard() {
         {/* Quick Actions */}
         <div>
           <h3 className="mb-3 text-sm font-semibold uppercase tracking-wide text-slate-500">
-            Quick Actions
+            {t("dashboard.quickActions")}
           </h3>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
             {quickActions.map((action) => (

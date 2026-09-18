@@ -1,8 +1,10 @@
-import { useEffect, useState } from "react";
+﻿import { useEffect, useState } from "react";
 import { getBeers } from "../../services/beersApi";
 import { createInitialStock } from "../../services/initialStockApi";
+import { useLanguage } from "../../i18n/context.js";
 
 function InitialStockSetup({ onSuccess }) {
+  const { t } = useLanguage();
   const [beers, setBeers] = useState([]);
   const [quantities, setQuantities] = useState({});
   const [date, setDate] = useState(() => new Date().toISOString().split("T")[0]);
@@ -21,13 +23,13 @@ function InitialStockSetup({ onSuccess }) {
         activeBeers.forEach((b) => { initial[b._id] = ""; });
         setQuantities(initial);
       } catch (err) {
-        setError("Failed to load beers: " + err.message);
+        setError(t("daily.initStockFailedToLoadBeers") + err.message);
       } finally {
         setBeersLoading(false);
       }
     };
     load();
-  }, []);
+  }, [t]);
 
   function handleQuantityChange(beerId, value) {
     setQuantities((prev) => ({ ...prev, [beerId]: value }));
@@ -42,7 +44,7 @@ function InitialStockSetup({ onSuccess }) {
       const val = quantities[beer._id];
       const num = Number(val);
       if (val === "" || !Number.isInteger(num) || num < 0) {
-        setError(`Please enter a valid non-negative quantity for ${beer.name}.`);
+        setError(t("daily.initStockEnterValidQuantity", { name: beer.name }));
         return;
       }
     }
@@ -57,7 +59,7 @@ function InitialStockSetup({ onSuccess }) {
       await createInitialStock(date, stock);
       onSuccess?.();
     } catch (err) {
-      setError(err.message || "Failed to create initial stock.");
+      setError(err.message || t("daily.initStockFailedToCreate"));
     } finally {
       setLoading(false);
     }
@@ -66,7 +68,7 @@ function InitialStockSetup({ onSuccess }) {
   if (beersLoading) {
     return (
       <div className="rounded-xl border border-slate-200 bg-white p-8 text-center shadow-sm">
-        <p className="text-sm text-slate-500">Loading beers...</p>
+        <p className="text-sm text-slate-500">{t("daily.initStockLoadingBeers")}</p>
       </div>
     );
   }
@@ -74,15 +76,15 @@ function InitialStockSetup({ onSuccess }) {
   if (beers.length === 0) {
     return (
       <div className="rounded-xl border border-amber-200 bg-amber-50 p-8 text-center shadow-sm">
-        <h2 className="text-lg font-semibold text-amber-900">No Active Beers</h2>
+        <h2 className="text-lg font-semibold text-amber-900">{t("daily.initStockNoActiveBeers")}</h2>
         <p className="mt-2 text-sm text-amber-700">
-          You need to add active beers before setting up initial stock.
+          {t("daily.initStockAddActiveFirst")}
         </p>
         <a
           href="/beers"
           className="mt-6 inline-block rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800"
         >
-          Go to Beer Management
+          {t("daily.initStockGoToBeers")}
         </a>
       </div>
     );
@@ -91,9 +93,9 @@ function InitialStockSetup({ onSuccess }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-6 py-5">
-        <h2 className="text-xl font-semibold text-slate-900">Set Up Initial Stock</h2>
+        <h2 className="text-xl font-semibold text-slate-900">{t("daily.initStockTitle")}</h2>
         <p className="mt-1 text-sm text-slate-500">
-          Enter the morning stock quantities for your first business day.
+          {t("daily.initStockDesc")}
           This only needs to be done once.
         </p>
       </div>
@@ -111,7 +113,7 @@ function InitialStockSetup({ onSuccess }) {
             htmlFor="initial-date"
             className="mb-1.5 block text-sm font-medium text-slate-700"
           >
-            Start Date
+            {t("daily.initStockStartDate")}
           </label>
           <input
             id="initial-date"
@@ -126,7 +128,7 @@ function InitialStockSetup({ onSuccess }) {
         {/* Beer quantities */}
         <div>
           <h3 className="mb-3 text-sm font-semibold text-slate-700 uppercase tracking-wide">
-            Morning Quantities (crates)
+            {t("daily.initStockMorningQuantities")}
           </h3>
           <div className="space-y-3">
             {beers.map((beer) => (
@@ -134,7 +136,7 @@ function InitialStockSetup({ onSuccess }) {
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-slate-900">{beer.name}</p>
                   <p className="text-xs text-slate-500">
-                    {(beer.price || 0).toLocaleString()} RWF / crate
+                    {t("daily.initStockPerCrate", { value: (beer.price || 0).toLocaleString() })}
                   </p>
                 </div>
                 <input
@@ -157,7 +159,7 @@ function InitialStockSetup({ onSuccess }) {
           disabled={loading}
           className="w-full rounded-lg bg-slate-900 px-5 py-3 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loading ? "Creating Initial Stock..." : "Create Initial Business Day"}
+          {loading ? t("daily.initStockCreating") : t("daily.initStockCreateDay")}
         </button>
       </form>
     </div>

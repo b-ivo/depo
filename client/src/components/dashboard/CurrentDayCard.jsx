@@ -1,6 +1,8 @@
-import { formatCurrency } from "../../utils/formatCurrency";
+﻿import { formatCurrency } from "../../utils/formatCurrency";
+import { useLanguage } from "../../i18n/context.js";
 
 function CurrentDayCard({ day }) {
+  const { t } = useLanguage();
   if (!day) {
     return null;
   }
@@ -13,7 +15,11 @@ function CurrentDayCard({ day }) {
     surplus: "bg-blue-100 text-blue-700",
   };
 
-  const displayStatus = status || (!day.closed ? "Open" : "Closed");
+  const displayStatus = status
+    ? t(`status.${status}`)
+    : day.closed
+      ? t("common.closed")
+      : t("common.open");
 
   const displayStatusClasses = status
     ? statusClasses[status] || "bg-slate-100 text-slate-700"
@@ -25,7 +31,7 @@ function CurrentDayCard({ day }) {
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-medium text-slate-500">Business Day</p>
+          <p className="text-sm font-medium text-slate-500">{t("common.businessDay")}</p>
 
           <h3 className="mt-1 text-lg font-semibold text-slate-900">
             {new Date(day.date).toLocaleDateString("en-GB")}
@@ -41,7 +47,7 @@ function CurrentDayCard({ day }) {
 
       <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <p className="text-xs text-slate-500">Sold</p>
+          <p className="text-xs text-slate-500">{t("common.sold")}</p>
 
           <p className="mt-1 text-lg font-semibold text-slate-900">
             {day.totals?.sold ?? "—"}
@@ -49,7 +55,7 @@ function CurrentDayCard({ day }) {
         </div>
 
         <div>
-          <p className="text-xs text-slate-500">Expected Sales</p>
+          <p className="text-xs text-slate-500">{t("common.expectedSales")}</p>
 
           <p className="mt-1 text-lg font-semibold text-slate-900">
             {formatCurrency(day.totals?.expectedSales)}
@@ -57,7 +63,7 @@ function CurrentDayCard({ day }) {
         </div>
 
         <div>
-          <p className="text-xs text-slate-500">Expected Cash</p>
+          <p className="text-xs text-slate-500">{t("common.expectedCash")}</p>
 
           <p className="mt-1 text-lg font-semibold text-slate-900">
             {formatCurrency(day.totals?.expectedCash)}
@@ -65,7 +71,7 @@ function CurrentDayCard({ day }) {
         </div>
 
         <div>
-          <p className="text-xs text-slate-500">Difference</p>
+          <p className="text-xs text-slate-500">{t("common.difference")}</p>
 
           <p className="mt-1 text-lg font-semibold text-slate-900">
             {formatCurrency(day.difference)}

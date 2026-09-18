@@ -1,20 +1,23 @@
+﻿import { useLanguage } from "../../i18n/context.js";
+
 function StockOverview({ day }) {
+  const { t } = useLanguage();
   const stock = day?.stock ?? [];
 
   return (
     <div className="overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
         <div>
-          <h2 className="font-semibold text-slate-900">Today's Stock</h2>
+          <h2 className="font-semibold text-slate-900">{t("common.todaysStock")}</h2>
 
-          <p className="mt-1 text-sm text-slate-500">Current stock position</p>
+          <p className="mt-1 text-sm text-slate-500">{t("common.stockPosition")}</p>
         </div>
       </div>
 
       {stock.length === 0 ? (
         <div className="p-6">
           <p className="text-sm text-slate-500">
-            No stock has been recorded for today.
+            {t("common.noStockRecordedToday")}
           </p>
         </div>
       ) : (

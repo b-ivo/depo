@@ -1,5 +1,6 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { recordEveningStock } from "../../services/daysApi";
+import { useLanguage } from "../../i18n/context.js";
 
 function buildInitialEveningStock(stock) {
   const initialStock = {};
@@ -12,6 +13,8 @@ function buildInitialEveningStock(stock) {
 }
 
 function EveningStockForm({ stock = [], onSuccess }) {
+  const { t } = useLanguage();
+
   const [eveningStock, setEveningStock] = useState(() =>
     buildInitialEveningStock(stock),
   );
@@ -38,16 +41,14 @@ function EveningStockForm({ stock = [], onSuccess }) {
       const value = eveningStock[item.beer];
 
       if (value === "" || value === undefined) {
-        setError(`Please enter evening stock for ${item.name}.`);
+        setError(t("daily.eveningEnterFor", { name: item.name }));
         return;
       }
 
       const evening = Number(value);
 
       if (!Number.isInteger(evening) || evening < 0) {
-        setError(
-          `Evening stock for ${item.name} must be a non-negative whole number.`,
-        );
+        setError(t("daily.eveningInvalidFor", { name: item.name }));
         return;
       }
 
@@ -62,7 +63,7 @@ function EveningStockForm({ stock = [], onSuccess }) {
 
       await recordEveningStock(payload);
 
-      setSuccess("Evening stock recorded successfully.");
+      setSuccess(t("daily.eveningRecorded"));
 
       onSuccess?.();
     } catch (error) {
@@ -79,10 +80,10 @@ function EveningStockForm({ stock = [], onSuccess }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="font-semibold text-slate-900">Evening Stock</h2>
+        <h2 className="font-semibold text-slate-900">{t("daily.eveningTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Enter the crates remaining at the end of the day.
+          {t("daily.eveningDesc")}
         </p>
       </div>
 
@@ -142,7 +143,7 @@ function EveningStockForm({ stock = [], onSuccess }) {
             disabled={loading}
             className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
           >
-            {loading ? "Saving..." : "Save Evening Stock"}
+            {loading ? t("common.saving") : t("daily.saveEveningStock")}
           </button>
 
           {error && (

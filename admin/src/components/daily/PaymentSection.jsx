@@ -1,8 +1,10 @@
-import { useState } from "react";
+﻿import { useState } from "react";
 import { recordMobileMoney, recordActualCash } from "../../services/daysApi";
 import { formatCurrency } from "../../utils/formatCurrency";
+import { useLanguage } from "../../i18n/context.js";
 
 function PaymentSection({ day, onSuccess }) {
+  const { t } = useLanguage();
   const [mobileMoney, setMobileMoney] = useState(
     day.payments?.mobileMoney ?? "",
   );
@@ -29,14 +31,14 @@ function PaymentSection({ day, onSuccess }) {
     setSuccess("");
 
     if (mobileMoney === "") {
-      setError("Enter Mobile Money amount or use 0.");
+      setError(t("daily.enterMobileMoney"));
       return;
     }
 
     const amount = Number(mobileMoney);
 
     if (!Number.isFinite(amount) || amount < 0) {
-      setError("Mobile Money must be a valid non-negative amount.");
+      setError(t("daily.invalidMobileMoney"));
       return;
     }
 
@@ -45,7 +47,7 @@ function PaymentSection({ day, onSuccess }) {
 
       await recordMobileMoney(amount);
 
-      setSuccess("Mobile Money recorded successfully.");
+      setSuccess(t("daily.mobileMoneyRecorded"));
 
       onSuccess?.();
     } catch (error) {
@@ -62,14 +64,14 @@ function PaymentSection({ day, onSuccess }) {
     setSuccess("");
 
     if (actualCash === "") {
-      setError("Enter the actual cash amount.");
+      setError(t("daily.enterActualCash"));
       return;
     }
 
     const amount = Number(actualCash);
 
     if (!Number.isFinite(amount) || amount < 0) {
-      setError("Actual cash must be a valid non-negative amount.");
+      setError(t("daily.invalidCash"));
       return;
     }
 
@@ -78,7 +80,7 @@ function PaymentSection({ day, onSuccess }) {
 
       await recordActualCash(amount);
 
-      setSuccess("Actual cash recorded successfully.");
+      setSuccess(t("daily.cashRecorded"));
 
       onSuccess?.();
     } catch (error) {
@@ -97,17 +99,17 @@ function PaymentSection({ day, onSuccess }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white shadow-sm">
       <div className="border-b border-slate-200 px-5 py-4">
-        <h2 className="font-semibold text-slate-900">Payment Reconciliation</h2>
+        <h2 className="font-semibold text-slate-900">{t("daily.paymentTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Reconcile today's sales with Mobile Money and physical cash.
+          {t("daily.paymentDesc")}
         </p>
       </div>
 
       <div className="grid gap-6 p-5 lg:grid-cols-3">
         {/* Expected sales */}
         <div className="rounded-lg bg-slate-50 p-4">
-          <p className="text-sm text-slate-500">Expected Sales</p>
+          <p className="text-sm text-slate-500">{t("common.expectedSales")}</p>
 
           <p className="mt-2 text-xl font-bold text-slate-900">
             {formatCurrency(expectedSales)}
@@ -116,10 +118,10 @@ function PaymentSection({ day, onSuccess }) {
 
         {/* Mobile Money */}
         <div className="rounded-lg border border-slate-200 p-4">
-          <p className="text-sm font-medium text-slate-700">Mobile Money</p>
+          <p className="text-sm font-medium text-slate-700">{t("common.mobileMoney")}</p>
 
           <p className="mt-1 text-xs text-slate-500">
-            Optional. Enter 0 if none was received.
+            {t("daily.optionalZero")}
           </p>
 
           <form onSubmit={handleMobileMoneySubmit} className="mt-4">
@@ -138,21 +140,21 @@ function PaymentSection({ day, onSuccess }) {
               disabled={loadingMobileMoney}
               className="mt-3 w-full rounded-lg bg-slate-900 px-4 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loadingMobileMoney ? "Saving..." : "Save Mobile Money"}
+              {loadingMobileMoney ? t("common.saving") : t("daily.saveMobileMoney")}
             </button>
           </form>
         </div>
 
         {/* Expected cash */}
         <div className="rounded-lg bg-slate-50 p-4">
-          <p className="text-sm text-slate-500">Expected Cash</p>
+          <p className="text-sm text-slate-500">{t("common.expectedCash")}</p>
 
           <p className="mt-2 text-xl font-bold text-slate-900">
             {formatCurrency(expectedCash)}
           </p>
 
           <p className="mt-2 text-xs text-slate-500">
-            Expected Sales − Mobile Money
+            {t("daily.expectedSalesMinusMobileMoney")}
           </p>
         </div>
       </div>
@@ -160,10 +162,10 @@ function PaymentSection({ day, onSuccess }) {
       {/* Actual cash */}
       <div className="border-t border-slate-200 p-5">
         <div className="max-w-md">
-          <p className="text-sm font-medium text-slate-700">Actual Cash</p>
+          <p className="text-sm font-medium text-slate-700">{t("common.actualCash")}</p>
 
           <p className="mt-1 text-xs text-slate-500">
-            Count the physical cash and enter the actual amount.
+            {t("daily.countPhysicalCash")}
           </p>
 
           <form onSubmit={handleActualCashSubmit} className="mt-4 flex gap-3">
@@ -182,7 +184,7 @@ function PaymentSection({ day, onSuccess }) {
               disabled={loadingCash}
               className="rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50"
             >
-              {loadingCash ? "Saving..." : "Save Cash"}
+              {loadingCash ? t("common.saving") : t("daily.saveCash")}
             </button>
           </form>
         </div>
@@ -193,7 +195,7 @@ function PaymentSection({ day, onSuccess }) {
         <div className="border-t border-slate-200 p-5">
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div>
-              <p className="text-sm text-slate-500">Difference</p>
+              <p className="text-sm text-slate-500">{t("common.difference")}</p>
 
               <p className="mt-1 text-2xl font-bold text-slate-900">
                 {formatCurrency(difference)}
@@ -206,7 +208,7 @@ function PaymentSection({ day, onSuccess }) {
                   statusClasses[day.status] || "bg-slate-100 text-slate-700"
                 }`}
               >
-                {day.status}
+                {t(`status.${day.status}`)}
               </span>
             )}
           </div>

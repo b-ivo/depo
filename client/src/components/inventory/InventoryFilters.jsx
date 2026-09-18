@@ -1,3 +1,5 @@
+﻿import { useLanguage } from "../../i18n/context.js";
+
 function InventoryFilters({
   beers = [],
   selectedBeer,
@@ -6,13 +8,15 @@ function InventoryFilters({
   onDateChange,
   onClear,
 }) {
+  const { t } = useLanguage();
+
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-4">
-        <h2 className="font-semibold text-slate-900">Filter Inventory</h2>
+        <h2 className="font-semibold text-slate-900">{t("inventory.filterTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          View movements for a specific beer or day.
+          {t("inventory.filterDesc")}
         </p>
       </div>
 
@@ -31,7 +35,7 @@ function InventoryFilters({
             onChange={(event) => onBeerChange(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
           >
-            <option value="">All beers</option>
+            <option value="">{t("inventory.allBeers")}</option>
 
             {beers.map((beer) => (
               <option key={beer._id} value={beer._id}>
@@ -64,7 +68,7 @@ function InventoryFilters({
             onClick={onClear}
             className="w-full rounded-lg border border-slate-300 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 hover:bg-slate-50"
           >
-            Clear Filters
+            {t("inventory.clearFilters")}
           </button>
         </div>
       </div>

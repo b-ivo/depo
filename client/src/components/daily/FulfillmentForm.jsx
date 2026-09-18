@@ -1,7 +1,9 @@
-import { useState } from "react";
+﻿import { useState } from "react";
+import { useLanguage } from "../../i18n/context.js";
 import { recordFulfillment } from "../../services/daysApi";
 
 function FulfillmentForm({ stock = [], onSuccess }) {
+  const { t } = useLanguage();
   const [beer, setBeer] = useState("");
   const [quantity, setQuantity] = useState("");
   const [loading, setLoading] = useState(false);
@@ -15,19 +17,19 @@ function FulfillmentForm({ stock = [], onSuccess }) {
     setSuccess("");
 
     if (!beer) {
-      setError("Please select a beer.");
+      setError(t("daily.fulfillmentSelectBeer"));
       return;
     }
 
     if (quantity === "") {
-      setError("Please enter a quantity.");
+      setError(t("daily.fulfillmentEnterQuantity"));
       return;
     }
 
     const parsedQuantity = Number(quantity);
 
     if (!Number.isInteger(parsedQuantity) || parsedQuantity <= 0) {
-      setError("Quantity must be a positive whole number.");
+      setError(t("daily.fulfillmentPositiveQuantity"));
       return;
     }
 
@@ -36,7 +38,7 @@ function FulfillmentForm({ stock = [], onSuccess }) {
 
       await recordFulfillment(beer, parsedQuantity);
 
-      setSuccess("Fulfillment recorded successfully.");
+      setSuccess(t("daily.fulfillmentRecorded"));
 
       setQuantity("");
 
@@ -51,10 +53,10 @@ function FulfillmentForm({ stock = [], onSuccess }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
       <div className="mb-5">
-        <h2 className="font-semibold text-slate-900">Fulfill Stock</h2>
+        <h2 className="font-semibold text-slate-900">{t("daily.fulfillmentTitle")}</h2>
 
         <p className="mt-1 text-sm text-slate-500">
-          Record additional crates brought into today's stock.
+          {t("daily.fulfillmentDesc")}
         </p>
       </div>
 
@@ -76,7 +78,7 @@ function FulfillmentForm({ stock = [], onSuccess }) {
             onChange={(event) => setBeer(event.target.value)}
             className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
           >
-            <option value="">Select beer</option>
+            <option value="">{t("daily.fulfillmentSelectBeerOption")}</option>
 
             {stock.map((item) => (
               <option key={item.beer} value={item.beer}>
@@ -112,7 +114,7 @@ function FulfillmentForm({ stock = [], onSuccess }) {
             disabled={loading}
             className="w-full rounded-lg bg-slate-900 px-5 py-2.5 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-50 sm:w-auto"
           >
-            {loading ? "Saving..." : "Add Stock"}
+            {loading ? t("common.saving") : t("daily.addStock")}
           </button>
         </div>
       </form>

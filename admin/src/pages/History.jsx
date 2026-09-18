@@ -3,6 +3,7 @@ import AppLayout from "../components/layout/AppLayout";
 import HistoryTable from "../components/history/HistoryTable";
 import { getDailyHistory, getHistoryByRange } from "../services/daysApi";
 import { useNavigate } from "react-router-dom";
+import { useLanguage } from "../i18n/context.js";
 
 function getDateRange(preset) {
   const today = new Date();
@@ -26,6 +27,7 @@ function getDateRange(preset) {
 }
 
 function History() {
+  const { t } = useLanguage();
   const [days, setDays] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -51,7 +53,7 @@ function History() {
       }
       setDays(response.data || []);
     } catch (err) {
-      setError(err.message || "Failed to load history.");
+      setError(err.message || t("history.failedToLoad"));
     } finally {
       setLoading(false);
     }
@@ -73,7 +75,7 @@ function History() {
         }
       } catch (err) {
         if (!cancelled) {
-          setError(err.message || "Failed to load history.");
+          setError(err.message || t("history.failedToLoad"));
         }
       } finally {
         if (!cancelled) {
@@ -92,7 +94,7 @@ function History() {
   function handleFilter(e) {
     e.preventDefault();
     if (!from || !to) {
-      setError("Please select both a from and to date.");
+      setError(t("history.selectBothDates"));
       return;
     }
     loadHistory(from, to);
@@ -114,12 +116,12 @@ function History() {
   }
 
   return (
-    <AppLayout title="History" description="Review completed business days" activePath="/admin/history">
+    <AppLayout title={t("history.title")} description={t("history.description")} activePath="/admin/history">
       {/* Filters */}
       <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
         <div className="flex flex-wrap items-end gap-3">
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">From</label>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("common.from")}</label>
             <input
               type="date"
               value={from}
@@ -128,7 +130,7 @@ function History() {
             />
           </div>
           <div>
-            <label className="mb-1.5 block text-sm font-medium text-slate-700">To</label>
+            <label className="mb-1.5 block text-sm font-medium text-slate-700">{t("common.to")}</label>
             <input
               type="date"
               value={to}
@@ -156,11 +158,11 @@ function History() {
 
         {/* Presets */}
         <div className="mt-3 flex flex-wrap gap-2">
-          <span className="text-xs text-slate-500 self-center">Quick:</span>
+          <span className="text-xs text-slate-500 self-center">{t("common.quick")}</span>
           {[
-            { label: "Last 7 days", key: "7days" },
-            { label: "Last 30 days", key: "30days" },
-            { label: "This Month", key: "month" },
+            { label: t("history.last7Days"), key: "7days" },
+            { label: t("history.last30Days"), key: "30days" },
+            { label: t("history.thisMonth"), key: "month" },
           ].map((p) => (
             <button
               key={p.key}
@@ -191,7 +193,7 @@ function History() {
       {/* Loading */}
       {loading && (
         <div className="rounded-xl border border-slate-200 bg-white p-10 text-center">
-          <p className="text-sm text-slate-500">Loading history...</p>
+          <p className="text-sm text-slate-500">{t("history.loading")}</p>
         </div>
       )}
 
@@ -200,7 +202,9 @@ function History() {
         <>
           {filtered && (
             <p className="text-xs text-slate-500">
-              Showing {days.length} record{days.length !== 1 ? "s" : ""} for {from} → {to}
+              {days.length === 1
+                ? t("history.showingRecord", { from, to })
+                : t("history.showingRecords", { count: days.length, from, to })}
             </p>
           )}
           <HistoryTable

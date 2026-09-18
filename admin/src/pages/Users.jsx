@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import Modal from "../components/Modal";
+import { useLanguage } from "../i18n/context.js";
 import { getAdminUser } from "../utils/auth";
 
 function RoleBadge({ role }) {
@@ -20,6 +21,7 @@ function RoleBadge({ role }) {
 }
 
 function Users() {
+  const { t } = useLanguage();
   const currentUser = getAdminUser();
   const isSuperAdmin = currentUser?.role === "superadmin";
 
@@ -60,9 +62,9 @@ function Users() {
           setBusinesses(businessesRes.data.data);
         }
       } catch (err) {
-        setError(
-          err.response?.data?.message || "Failed to load users.",
-        );
+      setError(
+        err.response?.data?.message || t("users.failedToLoad"),
+      );
       } finally {
         setLoading(false);
       }
@@ -123,7 +125,7 @@ function Users() {
       setShowAdd(false);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to create user.",
+        err.response?.data?.message || t("users.createFailed"),
       );
     } finally {
       setBusy(false);
@@ -152,7 +154,7 @@ function Users() {
       setEditingUser(null);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to update user.",
+        err.response?.data?.message || t("users.updateFailed"),
       );
     } finally {
       setBusy(false);
@@ -177,7 +179,7 @@ function Users() {
       setConfirmUser(null);
     } catch (err) {
       setActionError(
-        err.response?.data?.message || "Failed to update user status.",
+        err.response?.data?.message || t("users.updateStatusFailed"),
       );
     } finally {
       setBusy(false);
@@ -198,10 +200,18 @@ function Users() {
   const buttonClass =
     "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
 
+  const tableColumns = [
+    { key: "user", label: t("users.thUser") },
+    { key: "role", label: t("users.thRole") },
+    ...(isSuperAdmin ? [{ key: "business", label: t("users.thBusiness") }] : []),
+    { key: "status", label: t("users.thStatus") },
+    { key: "actions", label: t("users.thActions") },
+  ];
+
   if (loading) {
     return (
       <div className="flex min-h-full items-center justify-center p-8">
-        <p className="text-sm text-slate-500">Loading users...</p>
+        <p className="text-sm text-slate-500">{t("users.loading")}</p>
       </div>
     );
   }
@@ -210,19 +220,19 @@ function Users() {
     <div className="p-4 md:p-6 lg:p-8">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
-            Users
-          </h1>
+                <h1 className="text-2xl font-bold text-slate-900 md:text-3xl">
+                  {t("users.title")}
+                </h1>
 
           <p className="mt-1 text-sm text-slate-500">
-            {isSuperAdmin
-              ? "Manage users across all businesses."
-              : "Manage users in your business."}
+          {isSuperAdmin
+            ? t("users.descriptionSuper")
+            : t("users.descriptionBusiness")}
           </p>
         </div>
 
         <button onClick={openAdd} className={buttonClass}>
-          New user
+          {t("users.newUser")}
         </button>
       </div>
 
@@ -237,27 +247,11 @@ function Users() {
           <table className="w-full text-left text-sm">
             <thead className="border-b border-slate-200 bg-slate-50">
               <tr>
-                <th className="px-6 py-4 font-medium text-slate-500">
-                  User
-                </th>
-
-                <th className="px-6 py-4 font-medium text-slate-500">
-                  Role
-                </th>
-
-                {isSuperAdmin && (
-                  <th className="px-6 py-4 font-medium text-slate-500">
-                    Business
+                {tableColumns.map((col) => (
+                  <th key={col.key} className="px-6 py-4 font-medium text-slate-500">
+                    {col.label}
                   </th>
-                )}
-
-                <th className="px-6 py-4 font-medium text-slate-500">
-                  Status
-                </th>
-
-                <th className="px-6 py-4 font-medium text-slate-500">
-                  Actions
-                </th>
+                ))}
               </tr>
             </thead>
 
@@ -311,7 +305,7 @@ function Users() {
                           : "bg-slate-100 text-slate-600"
                       }`}
                     >
-                      {user.active ? "Active" : "Inactive"}
+                      {user.active ? t("common.active") : t("common.inactive")}
                     </span>
                   </td>
 
@@ -336,7 +330,7 @@ function Users() {
                               : "border-green-200 text-green-600 hover:bg-green-50"
                           }`}
                         >
-                          {user.active ? "Deactivate" : "Activate"}
+                          {user.active ? t("common.deactivate") : t("common.activate")}
                         </button>
                       </div>
                     ) : (
@@ -354,7 +348,7 @@ function Users() {
                     colSpan={isSuperAdmin ? 5 : 4}
                     className="px-6 py-8 text-center text-slate-500"
                   >
-                    No users found.
+                    {t("users.noFound")}
                   </td>
                 </tr>
               )}
@@ -364,7 +358,7 @@ function Users() {
       </div>
 
       {showAdd && (
-        <Modal title="New user" onClose={() => setShowAdd(false)}>
+        <Modal title={t("users.new")} onClose={() => setShowAdd(false)}>
           <form onSubmit={handleCreate} className="space-y-5">
             {actionError && (
               <div className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -374,7 +368,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Username
+                {t("users.username")}
               </label>
 
               <input
@@ -390,7 +384,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Email
+                {t("users.email")}
               </label>
 
               <input
@@ -406,7 +400,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Password
+                {t("users.password")}
               </label>
 
               <input
@@ -421,13 +415,13 @@ function Users() {
               />
 
               <p className="mt-1 text-xs text-slate-500">
-                At least 8 characters.
+                {t("users.minLength")}
               </p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Role
+                {t("users.role")}
               </label>
 
               <select
@@ -439,11 +433,11 @@ function Users() {
               >
                 {isSuperAdmin ? (
                   <>
-                    <option value="admin">Admin</option>
-                    <option value="staff">Staff</option>
+                    <option value="admin">{t("users.roleAdmin")}</option>
+                    <option value="staff">{t("users.roleStaff")}</option>
                   </>
                 ) : (
-                  <option value="staff">Staff</option>
+                  <option value="staff">{t("users.roleStaff")}</option>
                 )}
               </select>
             </div>
@@ -451,7 +445,7 @@ function Users() {
             {isSuperAdmin && (
               <div>
                 <label className="block text-sm font-medium text-slate-700">
-                  Business
+                  {t("users.business")}
                 </label>
 
                 <select
@@ -465,7 +459,7 @@ function Users() {
                   required
                   className={inputClass}
                 >
-                  <option value="">Select a business</option>
+                  <option value="">{t("users.selectBusiness")}</option>
 
                   {businesses
                     .filter((business) => business.active)
@@ -492,7 +486,7 @@ function Users() {
                 disabled={busy}
                 className={buttonClass}
               >
-                {busy ? "Creating..." : "Create user"}
+                {busy ? t("users.creating") : t("users.create")}
               </button>
             </div>
           </form>
@@ -501,8 +495,8 @@ function Users() {
 
       {editingUser && (
         <Modal
-          title="Edit user"
-          onClose={() => setEditingUser(null)}
+        title={t("users.editTitle")}
+        onClose={() => setEditingUser(null)}
         >
           <form onSubmit={handleUpdate} className="space-y-5">
             {actionError && (
@@ -513,7 +507,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Username
+                {t("users.username")}
               </label>
 
               <input
@@ -532,7 +526,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Email
+                {t("users.email")}
               </label>
 
               <input
@@ -551,7 +545,7 @@ function Users() {
 
             <div>
               <label className="block text-sm font-medium text-slate-700">
-                Role
+                {t("users.role")}
               </label>
 
               {isSuperAdmin ? (
@@ -565,11 +559,11 @@ function Users() {
                   }
                   className={inputClass}
                 >
-                  <option value="admin">Admin</option>
-                  <option value="staff">Staff</option>
+                  <option value="admin">{t("users.roleAdmin")}</option>
+                  <option value="staff">{t("users.roleStaff")}</option>
                   {editingUser.role === "superadmin" && (
                     <option value="superadmin">
-                      Superadmin (keep)
+                      {t("users.roleSuperKeep")}
                     </option>
                   )}
                 </select>
@@ -579,7 +573,7 @@ function Users() {
                   disabled
                   className={`${inputClass} bg-slate-50 text-slate-400`}
                 >
-                  <option value="staff">Staff</option>
+                  <option value="staff">{t("users.roleStaff")}</option>
                 </select>
               )}
             </div>
@@ -598,7 +592,7 @@ function Users() {
                 disabled={busy}
                 className={buttonClass}
               >
-                {busy ? "Saving..." : "Save changes"}
+                  {busy ? t("users.saving") : t("users.saveChanges")}
               </button>
             </div>
           </form>
@@ -606,22 +600,18 @@ function Users() {
       )}
 
       {confirmUser && (
-        <Modal
-          title={confirmUser.active ? "Deactivate user" : "Activate user"}
+      <Modal
+        title={
+          confirmUser.active ? t("users.deactivateTitle") : t("users.activateTitle")
+        }
           onClose={() => setConfirmUser(null)}
         >
           <p className="text-sm text-slate-600">
-            Are you sure you want to{" "}
-            <span className="font-medium text-slate-900">
-              {confirmUser.active ? "deactivate" : "activate"}
-            </span>{" "}
-            user{" "}
-            <span className="font-medium text-slate-900">
-              {confirmUser.username}
-            </span>
-            ?
-            {confirmUser.active &&
-              " They will no longer be able to sign in."}
+            {t("users.confirmBody", {
+              action: confirmUser.active ? t("common.deactivate").toLowerCase() : t("common.activate").toLowerCase(),
+              username: confirmUser.username,
+              warning: confirmUser.active ? t("users.noLongerSignIn") : "",
+            })}
           </p>
 
           {actionError && (
@@ -636,7 +626,7 @@ function Users() {
               onClick={() => setConfirmUser(null)}
               className="rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 transition hover:bg-slate-100"
             >
-              Cancel
+              {t("common.cancel")}
             </button>
 
             <button
@@ -649,7 +639,7 @@ function Users() {
                   : "bg-green-600 hover:bg-green-700"
               }`}
             >
-              {busy ? "Saving..." : "Confirm"}
+                  {busy ? t("common.saving") : t("common.confirm")}
             </button>
           </div>
         </Modal>

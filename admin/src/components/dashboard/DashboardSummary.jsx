@@ -1,37 +1,40 @@
 import { formatCurrency } from "../../utils/formatCurrency";
 import StatCard from "./StatCard";
+import { useLanguage } from "../../i18n/context.js";
 
 function DashboardSummary({ day }) {
+  const { t } = useLanguage();
+
   const cards = [
     {
-      title: "Total Sold",
+      title: t("dashboard.totalSold"),
       value: day?.totals?.sold ?? 0,
-      description: "Crates sold today",
+      description: t("dashboard.cratesSoldToday"),
     },
     {
-      title: "Expected Sales",
+      title: t("common.expectedSales"),
       value: formatCurrency(day?.totals?.expectedSales),
-      description: "Total value of sales",
+      description: t("dashboard.totalValueOfSales"),
     },
     {
-      title: "Expected Cash",
+      title: t("common.expectedCash"),
       value: formatCurrency(day?.totals?.expectedCash),
-      description: "Cash expected after Mobile Money",
+      description: t("dashboard.cashExpectedAfterMobileMoney"),
     },
     {
-      title: "Mobile Money",
+      title: t("common.mobileMoney"),
       value: formatCurrency(day?.payments?.mobileMoney),
-      description: "Mobile Money received",
+      description: t("dashboard.mobileMoneyReceived"),
     },
     {
-      title: "Actual Cash",
+      title: t("common.actualCash"),
       value: formatCurrency(day?.payments?.actualCash),
-      description: "Cash counted",
+      description: t("dashboard.cashCounted"),
     },
     {
-      title: "Difference",
+      title: t("common.difference"),
       value: formatCurrency(day?.difference),
-      description: getDifferenceDescription(day?.status),
+      description: getDifferenceDescription(day?.status, t),
     },
   ];
 
@@ -49,20 +52,20 @@ function DashboardSummary({ day }) {
   );
 }
 
-function getDifferenceDescription(status) {
+function getDifferenceDescription(status, t) {
   if (status === "balanced") {
-    return "Cash is balanced";
+    return t("dashboard.cashIsBalanced");
   }
 
   if (status === "shortage") {
-    return "Cash shortage";
+    return t("dashboard.cashShortage");
   }
 
   if (status === "surplus") {
-    return "Cash surplus";
+    return t("dashboard.cashSurplus");
   }
 
-  return "Not calculated yet";
+  return t("dashboard.notCalculatedYet");
 }
 
 export default DashboardSummary;
