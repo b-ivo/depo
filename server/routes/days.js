@@ -71,6 +71,8 @@ router.post("/start", async (req, res) => {
       businessId,
       date: today,
       stock,
+      createdBy: req.user.userId,
+      lastModifiedBy: req.user.userId,
 
       totals: {
         sold: null,
@@ -228,6 +230,7 @@ router.post("/add-beer", async (req, res) => {
       expected: null,
     });
 
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     res.status(201).json({
@@ -327,7 +330,7 @@ router.post("/fulfillment", async (req, res) => {
     }
 
     stockItem.fulfilled += quantity;
-
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     const movement = await InventoryMovement.create({
@@ -336,6 +339,7 @@ router.post("/fulfillment", async (req, res) => {
       type: "fulfillment",
       quantity,
       date: currentDay.date,
+      performedBy: req.user.userId,
     });
 
     res.status(201).json({
@@ -417,8 +421,25 @@ router.patch("/fulfillment/:beerId", async (req, res) => {
     }
 
     stockItem.fulfilled = quantity;
-
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
+
+    // --- Real-time inventory sync: keep InventoryMovement in sync with fulfilled total ---
+    await InventoryMovement.deleteMany({
+      businessId,
+      beer: beerId,
+      date: currentDay.date,
+    });
+    if (quantity > 0) {
+      await InventoryMovement.create({
+        businessId,
+        beer: beerId,
+        type: "fulfillment",
+        quantity,
+        date: currentDay.date,
+        performedBy: req.user.userId,
+      });
+    }
 
     res.json({
       success: true,
@@ -532,7 +553,7 @@ router.patch("/evening-stock", async (req, res) => {
       currentDay.totals.expectedCash =
         totalExpectedSales - currentDay.payments.mobileMoney;
     }
-
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     res.json({
@@ -609,7 +630,7 @@ router.patch("/mobile-money", async (req, res) => {
 
     currentDay.payments.mobileMoney = mobileMoney;
     currentDay.totals.expectedCash = expectedCash;
-
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     res.json({
@@ -697,7 +718,7 @@ router.patch("/actual-cash", async (req, res) => {
     currentDay.payments.actualCash = actualCash;
     currentDay.difference = difference;
     currentDay.status = status;
-
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     res.json({
@@ -775,7 +796,8 @@ router.post("/close", async (req, res) => {
     currentDay.difference = difference;
     currentDay.status = status;
     currentDay.closed = true;
-
+    currentDay.closedBy = req.user.userId;
+    currentDay.lastModifiedBy = req.user.userId;
     await currentDay.save();
 
     res.json({

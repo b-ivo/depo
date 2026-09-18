@@ -1,12 +1,16 @@
-﻿import { useLanguage } from "../../i18n/context.js";
+import { useLanguage } from "../../i18n/context.js";
 
 function InventoryFilters({
   beers = [],
+  users = [],
   selectedBeer,
   selectedDate,
+  selectedUser,
   onBeerChange,
   onDateChange,
+  onUserChange,
   onClear,
+  showUserFilter = false,
 }) {
   const { t } = useLanguage();
 
@@ -20,7 +24,7 @@ function InventoryFilters({
         </p>
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className={`grid gap-4 ${showUserFilter ? "md:grid-cols-4" : "md:grid-cols-3"}`}>
         <div>
           <label
             htmlFor="inventory-beer"
@@ -61,6 +65,32 @@ function InventoryFilters({
             className="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
           />
         </div>
+
+        {showUserFilter && (
+          <div>
+            <label
+              htmlFor="inventory-user"
+              className="mb-1.5 block text-sm font-medium text-slate-700"
+            >
+              {t("inventory.staff")}
+            </label>
+
+            <select
+              id="inventory-user"
+              value={selectedUser}
+              onChange={(event) => onUserChange(event.target.value)}
+              className="w-full rounded-lg border border-slate-300 bg-white px-3 py-2.5 text-sm outline-none focus:border-slate-500 focus:ring-2 focus:ring-slate-200"
+            >
+              <option value="">{t("inventory.allStaff")}</option>
+
+              {users.map((u) => (
+                <option key={u._id} value={u._id}>
+                  {u.username} ({u.email})
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
 
         <div className="flex items-end">
           <button

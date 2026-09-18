@@ -32,6 +32,13 @@ const inventoryMovementSchema = new mongoose.Schema(
       type: Date,
       required: true,
     },
+
+    performedBy: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+      index: true,
+    },
   },
   {
     timestamps: true,

@@ -65,7 +65,7 @@ function InventoryTable({ movements = [] }) {
         </div>
       ) : (
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[750px] text-sm">
+          <table className="w-full min-w-[850px] text-sm">
             <thead className="bg-slate-50">
               <tr>
                 <th className="px-5 py-3 text-left font-medium text-slate-500">

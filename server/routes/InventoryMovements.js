@@ -8,15 +8,28 @@ const router = express.Router();
 
 // ===============================
 // GET ALL INVENTORY MOVEMENTS
+// Supports ?userId= for per-staff history (admin only, staff sees own)
 // ===============================
 router.get("/", async (req, res) => {
   try {
     const businessId = req.user.businessId;
+    const { userId } = req.query;
 
-    const movements = await InventoryMovement.find({
-      businessId,
-    })
+    const filter = { businessId };
+
+    // Staff can only see own movements; admin can filter by any user
+    if (req.user.role === "staff") {
+      filter.performedBy = req.user.userId;
+    } else if (userId) {
+      if (!mongoose.Types.ObjectId.isValid(userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID." });
+      }
+      filter.performedBy = userId;
+    }
+
+    const movements = await InventoryMovement.find(filter)
       .populate("beer", "name price")
+      .populate("performedBy", "username email role")
       .sort({ date: -1 });
 
     res.json({
@@ -62,11 +75,17 @@ router.get("/beer/:beerId", async (req, res) => {
       });
     }
 
-    const movements = await InventoryMovement.find({
-      businessId,
-      beer: beerId,
-    })
+    const filter = { businessId, beer: beerId };
+    if (req.user.role === "staff") filter.performedBy = req.user.userId;
+    else if (req.query.userId) {
+      if (!mongoose.Types.ObjectId.isValid(req.query.userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID." });
+      }
+      filter.performedBy = req.query.userId;
+    }
+    const movements = await InventoryMovement.find(filter)
       .populate("beer", "name price")
+      .populate("performedBy", "username email role")
       .sort({ date: -1 });
 
     res.json({
@@ -104,14 +123,20 @@ router.get("/day/:date", async (req, res) => {
     const end = new Date(start);
     end.setDate(end.getDate() + 1);
 
-    const movements = await InventoryMovement.find({
+    const filter = {
       businessId,
-      date: {
-        $gte: start,
-        $lt: end,
-      },
-    })
+      date: { $gte: start, $lt: end },
+    };
+    if (req.user.role === "staff") filter.performedBy = req.user.userId;
+    else if (req.query.userId) {
+      if (!mongoose.Types.ObjectId.isValid(req.query.userId)) {
+        return res.status(400).json({ success: false, message: "Invalid user ID." });
+      }
+      filter.performedBy = req.query.userId;
+    }
+    const movements = await InventoryMovement.find(filter)
       .populate("beer", "name price")
+      .populate("performedBy", "username email role")
       .sort({ date: -1 });
 
     res.json({

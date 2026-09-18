@@ -6,6 +6,8 @@ import InventoryFilters from "../components/inventory/InventoryFilters";
 import InventorySummary from "../components/inventory/InventorySummary";
 
 import { getBeers } from "../services/beersApi";
+import api from "../services/api";
+import { getAdminUser } from "../utils/auth";
 import { useLanguage } from "../i18n/context.js";
 
 import {
@@ -16,11 +18,15 @@ import {
 
 function InventoryManagement() {
   const { t } = useLanguage();
+  const currentUser = getAdminUser();
+  const isAdmin = currentUser?.role === "admin";
   const [movements, setMovements] = useState([]);
   const [beers, setBeers] = useState([]);
+  const [staffUsers, setStaffUsers] = useState([]);
 
   const [selectedBeer, setSelectedBeer] = useState("");
   const [selectedDate, setSelectedDate] = useState("");
+  const [selectedUser, setSelectedUser] = useState("");
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -31,13 +37,20 @@ function InventoryManagement() {
 
     const load = async () => {
       try {
-        const response = await getBeers();
+        const [beersRes, usersRes] = await Promise.all([
+          getBeers(),
+          isAdmin ? api.get("/users").catch(() => ({ data: { data: [] } })) : Promise.resolve({ data: { data: [] } }),
+        ]);
 
         if (!cancelled) {
-          setBeers(response.data || []);
+          setBeers(beersRes.data || []);
+          if (isAdmin) {
+            const staff = (usersRes.data.data || []).filter((u) => u.role === "staff");
+            setStaffUsers(staff);
+          }
         }
       } catch (error) {
-        console.error("Failed to load beers:", error);
+        console.error("Failed to load beers/users:", error);
       }
     };
 
@@ -46,35 +59,39 @@ function InventoryManagement() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [isAdmin]);
 
   useEffect(() => {
     let cancelled = false;
 
-    const load = async () => {
+    const load = async (isPoll = false) => {
       try {
-        setLoading(true);
-        setError("");
+        if (!isPoll) {
+          setLoading(true);
+          setError("");
+        }
 
+        const userParams = selectedUser ? { userId: selectedUser } : {};
         let response;
 
         if (selectedBeer) {
-          response = await getBeerMovements(selectedBeer);
+          response = await getBeerMovements(selectedBeer, userParams);
         } else if (selectedDate) {
-          response = await getDailyMovements(selectedDate);
+          response = await getDailyMovements(selectedDate, userParams);
         } else {
-          response = await getInventoryMovements();
+          response = await getInventoryMovements(userParams);
         }
 
         if (!cancelled) {
           setMovements(response.data || []);
+          if (!isPoll) setError("");
         }
       } catch (error) {
-        if (!cancelled) {
+        if (!cancelled && !isPoll) {
           setError(error.message || t("inventory.failedToLoad"));
         }
       } finally {
-        if (!cancelled) {
+        if (!cancelled && !isPoll) {
           setLoading(false);
         }
       }
@@ -82,10 +99,20 @@ function InventoryManagement() {
 
     load();
 
+    // Real-time: poll every 5s and refetch on window focus
+    const interval = setInterval(() => load(true), 5000);
+    const onFocus = () => load(true);
+    window.addEventListener("focus", onFocus);
+    document.addEventListener("visibilitychange", () => {
+      if (document.visibilityState === "visible") load(true);
+    });
+
     return () => {
       cancelled = true;
+      clearInterval(interval);
+      window.removeEventListener("focus", onFocus);
     };
-  }, [selectedBeer, selectedDate, reloadKey, t]);
+  }, [selectedBeer, selectedDate, selectedUser, reloadKey, t]);
 
   function handleBeerChange(value) {
     setSelectedBeer(value);
@@ -95,9 +122,14 @@ function InventoryManagement() {
     setSelectedDate(value);
   }
 
+  function handleUserChange(value) {
+    setSelectedUser(value);
+  }
+
   function handleClear() {
     setSelectedBeer("");
     setSelectedDate("");
+    setSelectedUser("");
   }
 
   return (
@@ -109,11 +141,15 @@ function InventoryManagement() {
       <div className="space-y-6">
         <InventoryFilters
           beers={beers}
+          users={isAdmin ? staffUsers : []}
           selectedBeer={selectedBeer}
           selectedDate={selectedDate}
+          selectedUser={selectedUser}
           onBeerChange={handleBeerChange}
           onDateChange={handleDateChange}
+          onUserChange={handleUserChange}
           onClear={handleClear}
+          showUserFilter={isAdmin}
         />
 
         {error && (
