@@ -384,6 +384,12 @@
   "users.confirmActivateWord": "gutangiza",
   "users.userWord": " umukoresha ",
   "users.signInWarning": " Ntabwo azongera kubasha kwinjira.",
+  "users.staffCreated": "Umukoresha w'umukozi yaremye!",
+  "users.staffCreatedDesc": "Sangiza uyu murongo wo kwinjira n'umukozi:",
+  "users.clientLoginLink": "http://localhost:5173/login",
+  "users.copyLink": "Kopi imurongo",
+  "users.copied": "Byakopiwe!",
+  "users.shareCredentials": "Izina ry'umukoresha: {username} — muhe ijambo ry'ibanga mu buryo bwizewe.",
 
   "admindash.title": "Ikibaho cy'Ubuyobozi",
   "admindash.overview": "Incamake ya {name}.",

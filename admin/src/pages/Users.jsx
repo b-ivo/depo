@@ -46,6 +46,10 @@ function Users() {
     businessId: "",
   });
 
+  const [createdStaff, setCreatedStaff] = useState(null);
+  const [copied, setCopied] = useState(false);
+  const clientLoginUrl = t("users.clientLoginLink");
+
   useEffect(() => {
     const load = async () => {
       try {
@@ -123,6 +127,10 @@ function Users() {
 
       setUsers((prev) => [res.data.data, ...prev]);
       setShowAdd(false);
+      if (res.data.data.role === "staff") {
+        setCreatedStaff(res.data.data);
+        setCopied(false);
+      }
     } catch (err) {
       setActionError(
         err.response?.data?.message || t("users.createFailed"),
@@ -235,6 +243,36 @@ function Users() {
           {t("users.newUser")}
         </button>
       </div>
+
+      {createdStaff && (
+        <div className="mt-6 flex flex-wrap items-start justify-between gap-3 rounded-xl border border-green-200 bg-green-50 px-4 py-4">
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-green-800">{t("users.staffCreated")}</p>
+            <p className="mt-1 text-sm text-green-700">{t("users.staffCreatedDesc")}</p>
+            <div className="mt-2 flex items-center gap-2">
+              <code className="rounded bg-white px-2 py-1 text-sm font-mono text-slate-700 border border-green-200 break-all">{clientLoginUrl}</code>
+              <button
+                onClick={async () => {
+                  await navigator.clipboard.writeText(clientLoginUrl);
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                }}
+                className="shrink-0 rounded-lg bg-green-600 px-3 py-1.5 text-xs font-medium text-white hover:bg-green-700"
+              >
+                {copied ? t("users.copied") : t("users.copyLink")}
+              </button>
+            </div>
+            <p className="mt-2 text-xs text-green-600">{t("users.shareCredentials", { username: createdStaff.username })}</p>
+          </div>
+          <button
+            onClick={() => setCreatedStaff(null)}
+            className="rounded-lg p-1 text-green-600 hover:bg-green-100"
+            aria-label={t("common.close")}
+          >
+            ✕
+          </button>
+        </div>
+      )}
 
       {error && (
         <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">

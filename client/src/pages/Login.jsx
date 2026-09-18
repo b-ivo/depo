@@ -38,6 +38,12 @@ export default function Login() {
 
       console.log("Login response:", data);
 
+      // Client portal is for staff only — block admin/superadmin
+      if (data.data.role === "admin" || data.data.role === "superadmin") {
+        setError(t("login.accessDenied") || "Admins must use the admin portal (http://localhost:5174)");
+        return;
+      }
+
       // Save JWT
       localStorage.setItem("token", data.data.token);
 
@@ -54,12 +60,8 @@ export default function Login() {
         }),
       );
 
-      // Go to dashboard
-      if (data.data.role === "admin") {
-        navigate("/admin");
-      } else {
-        navigate("/");
-      }
+      // Go to dashboard (staff only)
+      navigate("/");
     } catch (error) {
       setError(error.message);
     } finally {
@@ -68,58 +70,60 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 flex items-center justify-center px-4">
-      <div className="absolute top-4 right-4">
-        <LanguageSwitcher />
-      </div>
-      <form
-        onSubmit={handleLogin}
-        className="w-full max-w-md bg-gray-800 p-8 rounded-2xl"
-      >
-        <h1 className="text-3xl font-bold text-white text-center mb-2">
-          {t("auth.title")}
-        </h1>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-white">{t("auth.title")}</h1>
+          <p className="mt-2 text-slate-400">{t("auth.subtitle")}</p>
+        </div>
 
-        <p className="text-gray-400 text-center mb-8">{t("auth.subtitle")}</p>
-
-        {error && (
-          <div className="bg-red-500/20 border border-red-500 text-red-400 p-3 rounded-lg mb-4">
-            {error}
+        <div className="rounded-2xl bg-white p-8 shadow-xl">
+          <div className="flex justify-end mb-2">
+            <LanguageSwitcher />
           </div>
-        )}
 
-        <div className="mb-4">
-          <label className="block text-white mb-2">{t("auth.email")}</label>
+          <h2 className="text-2xl font-bold text-slate-900">{t("auth.login")}</h2>
+          <p className="mt-1 text-sm text-slate-500">{t("auth.subtitle")}</p>
 
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder={t("auth.enterEmail")}
-            className="w-full h-11 px-4 rounded-lg bg-gray-700 text-white outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          {error && (
+            <div className="mt-5 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-700">
+              {error}
+            </div>
+          )}
+
+          <form onSubmit={handleLogin} className="mt-6 space-y-5">
+            <div>
+              <label className="block text-sm font-medium text-slate-700">{t("auth.email")}</label>
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder={t("auth.enterEmail")}
+                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-slate-700">{t("auth.password")}</label>
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder={t("auth.enterPassword")}
+                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
+              />
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full rounded-lg bg-slate-900 px-4 py-3 font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {loading ? t("auth.loggingIn") : t("auth.login")}
+            </button>
+          </form>
         </div>
-
-        <div className="mb-6">
-          <label className="block text-white mb-2">{t("auth.password")}</label>
-
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t("auth.enterPassword")}
-            className="w-full h-11 px-4 rounded-lg bg-gray-700 text-white outline-none focus:ring-2 focus:ring-blue-500"
-          />
-        </div>
-
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full h-11 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-600 text-white rounded-lg transition"
-        >
-          {loading ? t("auth.loggingIn") : t("auth.login")}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

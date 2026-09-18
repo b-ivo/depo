@@ -384,6 +384,12 @@
   "users.confirmActivateWord": "activer",
   "users.userWord": " l'utilisateur ",
   "users.signInWarning": " Il ne pourra plus se connecter.",
+  "users.staffCreated": "Utilisateur staff créé !",
+  "users.staffCreatedDesc": "Partagez ce lien de connexion avec le membre du staff :",
+  "users.clientLoginLink": "http://localhost:5173/login",
+  "users.copyLink": "Copier le lien",
+  "users.copied": "Copié !",
+  "users.shareCredentials": "Nom d'utilisateur : {username} — transmettez le mot de passe en sécurité.",
 
   "admindash.title": "Tableau de bord Admin",
   "admindash.overview": "Aperçu de {name}.",

@@ -384,6 +384,12 @@
   "users.confirmActivateWord": "activate",
   "users.userWord": " user ",
   "users.signInWarning": " They will no longer be able to sign in.",
+  "users.staffCreated": "Staff user created!",
+  "users.staffCreatedDesc": "Share this login link with the staff member:",
+  "users.clientLoginLink": "http://localhost:5173/login",
+  "users.copyLink": "Copy link",
+  "users.copied": "Copied!",
+  "users.shareCredentials": "Username: {username} — give them this password securely.",
 
   "admindash.title": "Admin Dashboard",
   "admindash.overview": "Overview of {name}.",

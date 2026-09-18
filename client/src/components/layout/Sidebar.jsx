@@ -6,9 +6,8 @@ import LanguageSwitcher from "../../i18n/LanguageSwitcher.jsx";
 function Sidebar({ open, onClose }) {
   const { t } = useLanguage();
   const user = getCurrentUser();
-  const isAdmin = user?.role === "admin" || user?.role === "superadmin";
 
-  const baseNavigation = [
+  const navigation = [
     { label: t("nav.dashboard"), path: "/" },
     { label: t("nav.dailyRecord"), path: "/daily" },
     { label: t("nav.history"), path: "/history" },
@@ -16,10 +15,6 @@ function Sidebar({ open, onClose }) {
     { label: t("nav.inventory"), path: "/inventory" },
     { label: t("nav.profile"), path: "/profile" },
   ];
-
-  const navigation = isAdmin
-    ? [...baseNavigation, { label: t("nav.adminHub"), path: "/admin" }]
-    : baseNavigation;
 
   return (
     <>

@@ -16,7 +16,6 @@ import usersRoutes from "./routes/users.js";
 import businessesRoutes from "./routes/businesses.js";
 
 import authMiddleware from "./middleware/auth.js";
-import requireRole from "./middleware/roles.js";
 import requireBusinessUser from "./middleware/requireBusinessUser.js";
 
 setServers(["8.8.8.8", "1.1.1.1"]);
@@ -88,13 +87,6 @@ app.get("/api/health", (req, res) => {
 app.use(authMiddleware);
 
 
-// Beers
-app.get("/api/admin/test", requireRole("admin", "superadmin"), (req, res) => {
-  res.json({
-    success: true,
-    message: "Admin access confirmed.",
-  });
-});
 app.use("/api/beers", requireBusinessUser, beersRouter);
 
 // Daily operations
