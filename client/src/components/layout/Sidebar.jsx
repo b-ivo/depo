@@ -30,9 +30,9 @@ function Sidebar({ open, onClose }) {
 
       <aside
         className={[
-          "fixed inset-y-0 left-0 z-50 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200",
+          "fixed inset-y-0 left-0 z-30 flex w-64 flex-col border-r border-slate-200 bg-white transition-transform duration-200",
           open ? "translate-x-0" : "-translate-x-full",
-          "lg:static lg:translate-x-0",
+          "lg:translate-x-0",
         ].join(" ")}
       >
         {/* Brand */}

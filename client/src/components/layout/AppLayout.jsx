@@ -12,7 +12,7 @@ function AppLayout({ children, title, description }) {
       <div className="flex min-h-screen">
         <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-        <div className="flex min-w-0 flex-1 flex-col">
+        <div className="flex min-w-0 flex-1 flex-col lg:pl-64">
           <Header
             title={title}
             description={description}

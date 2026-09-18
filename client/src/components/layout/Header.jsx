@@ -56,7 +56,7 @@ function Header({ title, description, onMenuClick }) {
   const initials = user?.username ? user.username.charAt(0).toUpperCase() : "?";
 
   return (
-    <header className="flex min-h-16 items-center justify-between border-b border-slate-200 bg-white px-4 sm:px-6">
+    <header className="sticky top-0 z-20 flex min-h-16 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 sm:px-6">
 
       {/* Left side */}
       <div className="flex items-center">

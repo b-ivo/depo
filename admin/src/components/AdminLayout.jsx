@@ -28,8 +28,8 @@ function AdminLayout() {
     <div className="flex min-h-screen bg-slate-100">
       <Sidebar user={user} />
 
-      <div className="flex min-w-0 flex-1 flex-col">
-        <header className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white px-4 md:px-6">
+      <div className="flex min-w-0 flex-1 flex-col md:pl-64">
+        <header className="sticky top-0 z-20 flex h-16 shrink-0 items-center justify-between border-b border-slate-200 bg-white/95 px-4 backdrop-blur supports-[backdrop-filter]:bg-white/80 md:px-6">
           <div>
             <p className="text-sm font-medium text-slate-900">
               {t("layout.adminTitle")}
