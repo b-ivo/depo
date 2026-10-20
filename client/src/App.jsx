@@ -6,6 +6,7 @@ import History from "./pages/History";
 import DailyHistoryDetail from "./pages/DailyHistoryDetail";
 import BeerManagement from "./pages/BeerManagement";
 import InventoryManagement from "./pages/InventoryManagement";
+import CrateLoans from "./pages/CrateLoans";
 import Login from "./pages/Login";
 import Profile from "./pages/Profile";
 
@@ -36,6 +37,8 @@ function App() {
           path="/inventory"
           element={<InventoryManagement />}
         />
+
+        <Route path="/loans" element={<CrateLoans />} />
 
         <Route path="/profile" element={<Profile />} />
       </Route>

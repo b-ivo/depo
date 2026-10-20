@@ -1,7 +1,7 @@
 import { NavLink } from "react-router-dom";
 import { useLanguage } from "../i18n/context.js";
 
-function Sidebar({ user }) {
+function Sidebar({ user, open, onClose }) {
   const { t } = useLanguage();
   const isSuperAdmin = user?.role === "superadmin";
   const isAdmin = user?.role === "admin";
@@ -51,6 +51,10 @@ function Sidebar({ user }) {
       path: "/admin/inventory",
     },
     {
+      name: t("nav.crateLoans"),
+      path: "/admin/loans",
+    },
+    {
       name: t("nav.users"),
       path: "/admin/users",
     },
@@ -67,7 +71,16 @@ function Sidebar({ user }) {
       : [];
 
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden h-screen w-64 shrink-0 flex-col bg-slate-950 text-white md:flex">
+    <>
+      {open && (
+        <button
+          type="button"
+          aria-label={t("nav.aria.closeNavigation")}
+          onClick={onClose}
+          className="fixed inset-0 z-20 bg-black/40 md:hidden"
+        />
+      )}
+      <aside className={`fixed inset-y-0 left-0 z-30 flex h-screen w-64 shrink-0 flex-col bg-slate-950 text-white transition-transform duration-200 ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:flex`}>
       <div className="border-b border-slate-800 px-6 py-5">
         <h1 className="text-xl font-bold">
           Mini DEPO
@@ -106,6 +119,7 @@ function Sidebar({ user }) {
             <NavLink
               key={link.path}
               to={link.path}
+              onClick={onClose}
               end={
                 link.path === "/admin" ||
                 link.path === "/superadmin"
@@ -130,6 +144,7 @@ function Sidebar({ user }) {
         </p>
       </div>
     </aside>
+    </>
   );
 }
 

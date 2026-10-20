@@ -9,14 +9,22 @@ import InventoryMovement from "../models/InventoryMovement.js";
 
 dotenv.config();
 
-const TARGET_EMAIL = "ivobryan12@gmail.com";
-const TARGET_PASSWORD = "1234567890";
+const TARGET_EMAIL = process.env.SUPERADMIN_EMAIL ?? "ivobryan12@gmail.com";
+const TARGET_PASSWORD = process.env.SUPERADMIN_PASSWORD;
 const TARGET_USERNAME = "superadmin";
 
 const resetDatabase = async () => {
   try {
     if (!process.env.MONGO_URI) {
       console.error("MONGO_URI is not set in .env");
+      process.exit(1);
+    }
+
+    if (!TARGET_PASSWORD) {
+      console.error("SUPERADMIN_PASSWORD is not set in .env");
+      console.error(
+        "Set it first so the reset account can be logged into afterwards.",
+      );
       process.exit(1);
     }
 
@@ -40,7 +48,8 @@ const resetDatabase = async () => {
       console.log("\nThis will:");
       console.log(" - Delete ALL Businesses, Beers, DailyRecords, InventoryMovements");
       console.log(" - Delete ALL Users except superadmin will be recreated");
-      console.log(` - Create/update superadmin -> ${TARGET_EMAIL} / ${TARGET_PASSWORD}`);
+      console.log(` - Create/update superadmin -> ${TARGET_EMAIL}`);
+      console.log(`   (password comes from SUPERADMIN_PASSWORD in .env)`);
       await mongoose.disconnect();
       process.exit(0);
     }
@@ -84,7 +93,8 @@ const resetDatabase = async () => {
 
     console.log("\n--- WIPE COMPLETE ---");
     console.log("Database now contains only superadmin");
-    console.log(`Login with: ${TARGET_EMAIL} / ${TARGET_PASSWORD}`);
+    console.log(`Login with: ${TARGET_EMAIL}`);
+    console.log(`Password is SUPERADMIN_PASSWORD from .env (see CREDENTIALS.txt)`);
 
     await mongoose.disconnect();
     process.exit(0);

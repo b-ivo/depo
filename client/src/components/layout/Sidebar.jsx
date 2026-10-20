@@ -13,6 +13,7 @@ function Sidebar({ open, onClose }) {
     { label: t("nav.history"), path: "/history" },
     { label: t("nav.beerManagement"), path: "/beers" },
     { label: t("nav.inventory"), path: "/inventory" },
+    { label: t("nav.crateLoans"), path: "/loans" },
     { label: t("nav.profile"), path: "/profile" },
   ];
 

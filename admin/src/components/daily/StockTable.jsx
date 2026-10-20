@@ -1,13 +1,56 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "../../i18n/context.js";
-import { updateFulfillment } from "../../services/daysApi";
+import { updateFulfillment, recordAmavide } from "../../services/daysApi";
 
-function StockTable({ stock = [], onSuccess }) {
+function StockTable({ stock = [], crateTotals = null, onSuccess }) {
   const { t } = useLanguage();
   const [editingBeer, setEditingBeer] = useState(null);
   const [quantity, setQuantity] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  const [editingAmavide, setEditingAmavide] = useState(false);
+  const [amavide, setAmavide] = useState("");
+  const [savingAmavide, setSavingAmavide] = useState(false);
+
+  const currentAmavide = crateTotals?.amavide;
+
+  function startEditingAmavide() {
+    setEditingAmavide(true);
+    setAmavide(
+      currentAmavide === null || currentAmavide === undefined
+        ? ""
+        : String(currentAmavide),
+    );
+    setError("");
+  }
+
+  async function saveAmavide() {
+    const value = Number(amavide);
+
+    if (amavide === "" || !Number.isInteger(value) || value < 0) {
+      setError(t("daily.amavideInvalid"));
+      return;
+    }
+
+    try {
+      setSavingAmavide(true);
+      setError("");
+
+      await recordAmavide(value);
+
+      setEditingAmavide(false);
+      setAmavide("");
+
+      if (onSuccess) {
+        await onSuccess();
+      }
+    } catch (saveError) {
+      setError(saveError.message);
+    } finally {
+      setSavingAmavide(false);
+    }
+  }
 
   function startEditing(item) {
     setEditingBeer(item.beer);
@@ -93,12 +136,82 @@ function StockTable({ stock = [], onSuccess }) {
               </th>
 
               <th className="px-5 py-3 text-right font-medium text-slate-500">
+                {t("daily.amavide")}
+              </th>
+
+              <th className="px-5 py-3 text-right font-medium text-slate-500">
                 Action
               </th>
             </tr>
           </thead>
 
           <tbody className="divide-y divide-slate-100">
+            {/* Amavide: one total for the whole day, not per beer. */}
+            <tr className="bg-amber-50/60">
+              <td className="px-5 py-4 font-semibold text-slate-900">
+                {t("daily.amavide")}
+              </td>
+
+              <td colSpan="5" className="px-5 py-4 text-right text-xs text-slate-500">
+                {t("daily.amavideHint")}
+              </td>
+
+              <td className="px-5 py-4 text-right">
+                {editingAmavide ? (
+                  <input
+                    type="number"
+                    min="0"
+                    step="1"
+                    value={amavide}
+                    onChange={(event) => setAmavide(event.target.value)}
+                    disabled={savingAmavide}
+                    aria-label={t("daily.amavide")}
+                    className="w-24 rounded-lg border border-slate-300 px-3 py-2 text-right outline-none focus:border-slate-500"
+                  />
+                ) : (
+                  <span className="font-semibold text-slate-900">
+                    {currentAmavide ?? "—"}
+                  </span>
+                )}
+              </td>
+
+              <td className="px-5 py-4 text-right">
+                {editingAmavide ? (
+                  <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+                    <button
+                      type="button"
+                      onClick={saveAmavide}
+                      disabled={savingAmavide}
+                      className="rounded-lg bg-slate-900 px-3 py-2 text-xs font-medium text-white hover:bg-slate-800 disabled:opacity-50"
+                    >
+                      {savingAmavide ? t("common.saving") : t("common.save")}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setEditingAmavide(false);
+                        setAmavide("");
+                        setError("");
+                      }}
+                      disabled={savingAmavide}
+                      className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                    >
+                      {t("common.cancel")}
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={startEditingAmavide}
+                    className="rounded-lg border border-slate-300 bg-white px-3 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    {t("common.edit")}
+                  </button>
+                )}
+              </td>
+            </tr>
+
             {stock.map((item) => {
               const available = (item.morning ?? 0) + (item.fulfilled ?? 0);
 
@@ -142,9 +255,11 @@ function StockTable({ stock = [], onSuccess }) {
 
                   <td className="px-5 py-4 text-right">{item.sold ?? "—"}</td>
 
+                  <td className="px-5 py-4 text-right text-slate-400">—</td>
+
                   <td className="px-5 py-4 text-right">
                     {isEditing ? (
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                         <button
                           type="button"
                           onClick={() => saveFulfillment(item.beer)}
@@ -182,7 +297,7 @@ function StockTable({ stock = [], onSuccess }) {
             {stock.length === 0 && (
               <tr>
                 <td
-                  colSpan="7"
+                  colSpan="8"
                   className="px-5 py-10 text-center text-slate-500"
                 >
                   {t("common.noStockRecorded")}

@@ -1,4 +1,4 @@
-﻿import { useState } from "react";
+import { useState } from "react";
 import { useLanguage } from "../../i18n/context.js";
 import { updateFulfillment } from "../../services/daysApi";
 
@@ -145,7 +145,7 @@ function StockTable({ stock = [], onSuccess }) {
 
                   <td className="px-5 py-4 text-right">
                     {isEditing ? (
-                      <div className="flex justify-end gap-2">
+                      <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                         <button
                           type="button"
                           onClick={() => saveFulfillment(item.beer)}

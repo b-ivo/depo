@@ -17,6 +17,7 @@ import History from "./pages/History";
 import DailyHistoryDetail from "./pages/DailyHistoryDetail";
 import BeerManagement from "./pages/BeerManagement";
 import InventoryManagement from "./pages/InventoryManagement";
+import CrateLoans from "./pages/CrateLoans";
 
 import ProtectedRoute from "./components/ProtectedRoute";
 import AdminLayout from "./components/AdminLayout";
@@ -59,6 +60,7 @@ function App() {
           <Route path="history/:id" element={<DailyHistoryDetail />} />
           <Route path="beers" element={<BeerManagement />} />
           <Route path="inventory" element={<InventoryManagement />} />
+          <Route path="loans" element={<CrateLoans />} />
           <Route path="users" element={<Users />} />
           <Route path="profile" element={<Profile />} />
         </Route>

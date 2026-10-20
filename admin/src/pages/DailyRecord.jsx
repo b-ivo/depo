@@ -6,6 +6,7 @@ import FulfillmentForm from "../components/daily/FulfillmentForm";
 import EveningStockForm from "../components/daily/EveningStockForm";
 import PaymentSection from "../components/daily/PaymentSection";
 import CloseDaySection from "../components/daily/CloseDaySection";
+import DayCratesSection from "../components/daily/DayCratesSection";
 import AddBeerToDay from "../components/daily/AddBeerToDay";
 
 import { startBusinessDay } from "../services/daysApi";
@@ -163,7 +164,14 @@ function DailyRecord() {
         </div>
 
         {/* Stock table */}
-        <StockTable stock={day.stock} onSuccess={refresh} />
+        <StockTable
+          stock={day.stock}
+          crateTotals={day.crateTotals}
+          onSuccess={refresh}
+        />
+
+        {/* Empty crates lent and returned today */}
+        <DayCratesSection day={day} />
 
         {/* Fulfillment & add beer row */}
         <div className="grid gap-6 lg:grid-cols-2">

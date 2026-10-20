@@ -320,7 +320,7 @@ function Businesses() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setShowAdd(false)}
@@ -385,7 +385,7 @@ function Businesses() {
               />
             </div>
 
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end pt-2">
               <button
                 type="button"
                 onClick={() => setEditing(null)}
@@ -436,7 +436,7 @@ function Businesses() {
             </div>
           )}
 
-          <div className="mt-6 flex justify-end gap-2">
+          <div className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
             <button
               type="button"
               onClick={() => setConfirmBusiness(null)}

@@ -11,6 +11,7 @@ function Login() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -120,14 +121,34 @@ function Login() {
                 {t("auth.password")}
               </label>
 
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
-                placeholder="••••••••"
-              />
+              <div className="relative mt-2">
+                <input
+                  type={showPassword ? "text" : "password"}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-slate-900"
+                  placeholder="••••••••"
+                />
+
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((visible) => !visible)}
+                  aria-label={
+                    showPassword
+                      ? t("login.hidePassword")
+                      : t("login.showPassword")
+                  }
+                  title={
+                    showPassword
+                      ? t("login.hidePassword")
+                      : t("login.showPassword")
+                  }
+                  className="absolute inset-y-0 right-0 flex w-12 items-center justify-center rounded-r-lg text-slate-500 transition hover:text-slate-900 focus:outline-none focus-visible:ring-2 focus-visible:ring-slate-400"
+                >
+                  <EyeIcon open={showPassword} />
+                </button>
+              </div>
             </div>
 
             <button
@@ -141,6 +162,36 @@ function Login() {
         </div>
       </div>
     </div>
+  );
+}
+
+function EyeIcon({ open }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className="h-5 w-5"
+      aria-hidden="true"
+    >
+      {open ? (
+        <>
+          <path d="M2.4 12S5.9 5.5 12 5.5 21.6 12 21.6 12 18.1 18.5 12 18.5 2.4 12 2.4 12Z" />
+          <circle cx="12" cy="12" r="3.1" />
+        </>
+      ) : (
+        <>
+          <path d="M9.9 5.8A9.6 9.6 0 0 1 12 5.5c6.1 0 9.6 6.5 9.6 6.5a17 17 0 0 1-3.3 4.2" />
+          <path d="M6.3 7.8A16.9 16.9 0 0 0 2.4 12S5.9 18.5 12 18.5a9.4 9.4 0 0 0 3.9-.8" />
+          <path d="M9.9 9.9a3.1 3.1 0 0 0 4.3 4.3" />
+          <path d="M3.5 3.5l17 17" />
+        </>
+      )}
+    </svg>
   );
 }
 

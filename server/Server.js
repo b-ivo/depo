@@ -12,6 +12,8 @@ import beersRouter from "./routes/Beers.js";
 import inventoryMovementsRouter from "./routes/InventoryMovements.js";
 import initialStockRouter from "./routes/InitialStock.js";
 import daysRouter from "./routes/days.js";
+import crateLoansRouter from "./routes/CrateLoans.js";
+import emptyCratesRouter from "./routes/EmptyCrates.js";
 import usersRoutes from "./routes/users.js";
 import businessesRoutes from "./routes/businesses.js";
 
@@ -101,6 +103,21 @@ app.use(
 
 // Initial stock
 app.use("/api/initial-stock", requireBusinessUser, initialStockRouter);
+
+// Empty crates lent out and not returned
+app.use(
+  "/api/crate-loans",
+  requireBusinessUser,
+  crateLoansRouter
+);
+
+// Empty crates physically present in the depot
+app.use(
+  "/api/empty-crates",
+  requireBusinessUser,
+  emptyCratesRouter
+);
+
 app.use("/api/businesses", businessesRoutes);
 app.use("/api/users", usersRoutes);
 

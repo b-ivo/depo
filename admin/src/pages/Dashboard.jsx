@@ -5,6 +5,8 @@ import AppLayout from "../components/layout/AppLayout";
 import CurrentDayCard from "../components/dashboard/CurrentDayCard";
 import DashboardSummary from "../components/dashboard/DashboardSummary";
 import StockOverview from "../components/dashboard/StockOverview";
+import OverdueLoansCard from "../components/dashboard/OverdueLoansCard";
+import EmptyCratesCard from "../components/dashboard/EmptyCratesCard";
 
 import { getCurrentDay } from "../services/daysApi";
 import { useLanguage } from "../i18n/context.js";
@@ -58,6 +60,12 @@ function Dashboard() {
       description={t("dashboard.description")}
       activePath="/admin/dashboard"
     >
+      <div className="mb-6 space-y-6">
+        <OverdueLoansCard />
+
+        <EmptyCratesCard />
+      </div>
+
       {/* Loading */}
       {loading && (
         <div className="flex min-h-64 items-center justify-center rounded-xl border border-slate-200 bg-white">

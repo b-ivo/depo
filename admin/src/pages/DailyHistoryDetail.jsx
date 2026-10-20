@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import AppLayout from "../components/layout/AppLayout";
+import DayCratesSection from "../components/daily/DayCratesSection";
 import { getDailyRecord } from "../services/daysApi";
 import { formatCurrency } from "../utils/formatCurrency";
 import { useLanguage } from "../i18n/context.js";
@@ -236,6 +237,9 @@ function DailyHistoryDetail() {
             </table>
           </div>
         </div>
+
+        {/* Empty crate lending and returning */}
+        <DayCratesSection day={day} />
 
         {/* Payment details */}
         <div className="rounded-xl border border-slate-200 bg-white shadow-sm">

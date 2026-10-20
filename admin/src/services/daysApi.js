@@ -63,6 +63,14 @@ export function getDailyRecord(id) {
   return api.get(`/days/${id}`).then((response) => response.data);
 }
 
+export function recordAmavide(amavide) {
+  return api
+    .patch("/days/amavide", {
+      amavide,
+    })
+    .then((response) => response.data);
+}
+
 export function startBusinessDay() {
   return api.post("/days/start").then((response) => response.data);
 }
