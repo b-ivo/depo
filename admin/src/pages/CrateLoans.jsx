@@ -134,11 +134,6 @@ function CrateLoans() {
       value: summary?.overdueLoans ?? 0,
       tone: summary?.overdueLoans > 0 ? "text-red-700" : "text-slate-900",
     },
-    {
-      label: t("loans.summaryEmptyCrates"),
-      value: summary?.emptyCratesInDepot ?? 0,
-      tone: "text-slate-900",
-    },
   ];
 
   return (
@@ -182,7 +177,7 @@ function CrateLoans() {
         )}
 
         {!error && (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {summaryCards.map((card) => (
               <div
                 key={card.label}

@@ -6,18 +6,12 @@ import { getCurrentDay } from "../services/daysApi";
 import { getBeers } from "../services/beersApi";
 import { useLanguage } from "../i18n/context.js";
 
-function StatCard({ label, value, sub, color = "slate" }) {
-  const colors = {
-    slate: "bg-slate-50 border-slate-200 text-slate-900",
-    green: "bg-green-50 border-green-200 text-green-900",
-    blue: "bg-blue-50 border-blue-200 text-blue-900",
-    amber: "bg-amber-50 border-amber-200 text-amber-900",
-  };
+function StatCard({ label, value, sub }) {
   return (
-    <div className={`rounded-xl border p-5 ${colors[color]}`}>
-      <p className="text-xs font-medium uppercase tracking-wide opacity-60">{label}</p>
-      <p className="mt-2 text-2xl font-bold">{value}</p>
-      {sub && <p className="mt-1 text-xs opacity-60">{sub}</p>}
+    <div className="rounded-xl border border-slate-200 bg-white p-5 shadow-sm">
+      <p className="text-sm font-medium text-slate-500">{label}</p>
+      <p className="mt-2 text-2xl font-bold text-slate-900">{value}</p>
+      {sub && <p className="mt-1 text-xs text-slate-500">{sub}</p>}
     </div>
   );
 }
@@ -107,7 +101,6 @@ function AdminDashboard() {
             label={t("dashboard.activeBeers")}
             value={beerCount ?? "—"}
             sub={t("dashboard.inYourCatalogue")}
-            color="blue"
           />
           {dayData && dayStatus === "open" ? (
             <StatCard
@@ -116,7 +109,6 @@ function AdminDashboard() {
               sub={dayData.totals?.expectedSales
                 ? t("dashboard.expectedInThousands", { value: (dayData.totals.expectedSales / 1000).toFixed(0) })
                 : t("dashboard.eveningStockNotRecorded")}
-              color="green"
             />
           ) : (
             <StatCard

@@ -164,7 +164,11 @@ function DailyRecord() {
         </div>
 
         {/* Stock table */}
-        <StockTable stock={day.stock} onSuccess={refresh} />
+        <StockTable
+          stock={day.stock}
+          crateTotals={day.crateTotals}
+          onSuccess={refresh}
+        />
 
         {/* Fulfillment & add beer row */}
         <div className="grid gap-6 lg:grid-cols-2">

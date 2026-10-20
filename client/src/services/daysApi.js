@@ -98,3 +98,12 @@ export function updateFulfillment(beerId, quantity) {
     }),
   });
 }
+
+export function recordAmavide(amavide) {
+  return apiRequest("/days/amavide", {
+    method: "PATCH",
+    body: JSON.stringify({
+      amavide,
+    }),
+  });
+}

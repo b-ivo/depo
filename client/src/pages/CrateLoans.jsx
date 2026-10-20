@@ -3,7 +3,6 @@ import { useEffect, useState } from "react";
 import AppLayout from "../components/layout/AppLayout";
 import CrateLoanForm from "../components/loans/CrateLoanForm";
 import CrateLoanTable from "../components/loans/CrateLoanTable";
-import EmptyCrateStock from "../components/loans/EmptyCrateStock";
 import ReturnForm from "../components/loans/ReturnForm";
 
 import { getBeers } from "../services/beersApi";
@@ -11,7 +10,6 @@ import {
   deleteCrateLoan,
   getCrateLoanSummary,
   getCrateLoans,
-  getEmptyCrates,
 } from "../services/crateLoansApi";
 import { useLanguage } from "../i18n/context.js";
 
@@ -30,7 +28,6 @@ function CrateLoans() {
   const [beers, setBeers] = useState([]);
   const [loans, setLoans] = useState([]);
   const [summary, setSummary] = useState(null);
-  const [emptyCrates, setEmptyCrates] = useState([]);
 
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
@@ -63,19 +60,16 @@ function CrateLoans() {
           params.q = search.trim();
         }
 
-        const [beersRes, loansRes, summaryRes, emptyRes] =
-          await Promise.all([
-            getBeers(),
-            getCrateLoans(params),
-            getCrateLoanSummary(),
-            getEmptyCrates(),
-          ]);
+        const [beersRes, loansRes, summaryRes] = await Promise.all([
+          getBeers(),
+          getCrateLoans(params),
+          getCrateLoanSummary(),
+        ]);
 
         if (!cancelled) {
           setBeers(beersRes.data || []);
           setLoans(loansRes.data || []);
           setSummary(summaryRes.data || null);
-          setEmptyCrates(emptyRes.data || []);
         }
       } catch (loadError) {
         if (!cancelled) {
@@ -111,11 +105,6 @@ function CrateLoans() {
     refresh();
   }
 
-  function handleCounted() {
-    setNotice(t("loans.counted"));
-    refresh();
-  }
-
   async function handleDelete(loan) {
     if (!window.confirm(t("loans.deleteConfirm", { name: loan.borrowerName }))) {
       return;
@@ -144,11 +133,6 @@ function CrateLoans() {
       label: t("loans.summaryOverdueLoans"),
       value: summary?.overdueLoans ?? 0,
       tone: summary?.overdueLoans > 0 ? "text-red-700" : "text-slate-900",
-    },
-    {
-      label: t("loans.summaryEmptyCrates"),
-      value: summary?.emptyCratesInDepot ?? 0,
-      tone: "text-slate-900",
     },
   ];
 
@@ -193,7 +177,7 @@ function CrateLoans() {
         )}
 
         {!error && (
-          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
             {summaryCards.map((card) => (
               <div
                 key={card.label}
@@ -275,14 +259,6 @@ function CrateLoans() {
             loans={loans}
             onReturn={setReturningLoan}
             onDelete={handleDelete}
-          />
-        )}
-
-        {!error && !loading && (
-          <EmptyCrateStock
-            emptyCrates={emptyCrates}
-            beers={beers}
-            onCounted={handleCounted}
           />
         )}
       </div>

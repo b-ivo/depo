@@ -95,7 +95,7 @@ function Profile() {
   };
 
   const inputClass =
-    "mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900";
+    "mt-2 w-full rounded-lg border border-slate-300 bg-white px-4 py-3 text-slate-900 outline-none transition focus:border-slate-500 focus:ring-2 focus:ring-slate-200";
 
   const buttonClass =
     "rounded-lg bg-slate-900 px-4 py-2 text-sm font-medium text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60";
@@ -183,13 +183,13 @@ function Profile() {
             </p>
 
             {message && (
-              <div className="mt-5 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-700">
+              <div className="mt-5 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-600">
                 {message}
               </div>
             )}
 
             {formError && (
-              <div className="mt-5 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">
+              <div className="mt-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
                 {formError}
               </div>
             )}

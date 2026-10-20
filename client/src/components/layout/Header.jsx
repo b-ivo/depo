@@ -90,11 +90,11 @@ function Header({ title, description, onMenuClick }) {
       {/* Right side */}
       <div className="flex items-center gap-3">
         {/* Language Switcher */}
-        <LanguageSwitcher className="hidden md:flex" />
+        <LanguageSwitcher className="hidden lg:flex" />
 
         {/* Active Business Badge */}
         {user?.business && (
-          <div className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 md:flex">
+          <div className="hidden items-center gap-1.5 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-700 lg:flex">
             <span>🏢</span>
             <span className="font-semibold text-slate-800">{user.business.name}</span>
             {user.business.location && (

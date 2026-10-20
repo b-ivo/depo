@@ -82,7 +82,7 @@ function Login() {
           </div>
 
           {error && (
-            <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${error === "STAFF_PORTAL" ? "bg-amber-50 border border-amber-200 text-amber-800" : "bg-red-50 text-red-700"}`}>
+            <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${error === "STAFF_PORTAL" ? "bg-amber-50 border border-amber-200 text-amber-800" : "border border-red-200 bg-red-50 text-red-600"}`}>
               {error === "STAFF_PORTAL" ? (
                 <div>
                   <p className="font-medium">{t("login.staffMustUseClient")}</p>
@@ -111,7 +111,7 @@ function Login() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
-                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900"
+                className="mt-2 w-full rounded-lg border border-slate-300 px-4 py-3 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                 placeholder="admin@example.com"
               />
             </div>
@@ -127,7 +127,7 @@ function Login() {
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   required
-                  className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-slate-900"
+                  className="w-full rounded-lg border border-slate-300 px-4 py-3 pr-12 outline-none focus:border-slate-900 focus:ring-2 focus:ring-slate-200"
                   placeholder="••••••••"
                 />
 

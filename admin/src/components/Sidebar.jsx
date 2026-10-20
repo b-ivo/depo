@@ -77,10 +77,10 @@ function Sidebar({ user, open, onClose }) {
           type="button"
           aria-label={t("nav.aria.closeNavigation")}
           onClick={onClose}
-          className="fixed inset-0 z-20 bg-black/40 md:hidden"
+          className="fixed inset-0 z-40 bg-black/40 lg:hidden"
         />
       )}
-      <aside className={`fixed inset-y-0 left-0 z-30 flex h-screen w-64 shrink-0 flex-col bg-slate-950 text-white transition-transform duration-200 ${open ? "translate-x-0" : "-translate-x-full"} md:translate-x-0 md:flex`}>
+      <aside className={`fixed inset-y-0 left-0 z-50 flex h-screen w-64 shrink-0 flex-col bg-slate-950 text-white transition-transform duration-200 ${open ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:flex`}>
       <div className="border-b border-slate-800 px-6 py-5">
         <h1 className="text-xl font-bold">
           Mini DEPO

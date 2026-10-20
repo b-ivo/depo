@@ -35,14 +35,3 @@ export function deleteCrateLoan(id) {
     method: "DELETE",
   });
 }
-
-export function getEmptyCrates() {
-  return apiRequest("/empty-crates");
-}
-
-export function recordEmptyCrateCount(data) {
-  return apiRequest("/empty-crates/count", {
-    method: "POST",
-    body: JSON.stringify(data),
-  });
-}

@@ -24,7 +24,3 @@ export function recordCrateReturn(id, data) {
 export function deleteCrateLoan(id) {
   return api.delete(`/crate-loans/${id}`).then((response) => response.data);
 }
-
-export function getEmptyCrates() {
-  return api.get("/empty-crates").then((response) => response.data);
-}

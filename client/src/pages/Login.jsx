@@ -88,7 +88,7 @@ function Login() {
           <p className="mt-1 text-sm text-slate-500">{t("auth.subtitle")}</p>
 
         {error && (
-          <div className="rounded-lg bg-amber-50 border border-amber-200 px-4 py-3">
+          <div className={`mt-5 rounded-lg px-4 py-3 text-sm ${error === "ADMIN_PORTAL" ? "bg-amber-50 border border-amber-200 text-amber-800" : "border border-red-200 bg-red-50 text-red-600"}`}>
             {error === "ADMIN_PORTAL" ? (
               <div>
                 <p className="text-sm font-medium text-amber-800">{t("login.adminMustUseAdmin")}</p>
@@ -98,7 +98,7 @@ function Login() {
                 </a>
               </div>
             ) : (
-              <p className="text-sm text-red-700">{error}</p>
+              error
             )}
           </div>
         )}
