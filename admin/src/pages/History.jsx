@@ -89,7 +89,7 @@ function History() {
     return () => {
       cancelled = true;
     };
-  }, []);
+  }, [t]);
 
   function handleFilter(e) {
     e.preventDefault();

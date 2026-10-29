@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
 import { getAdminUser } from "../utils/auth";
-import { useLanguage } from "../i18n/context.js";
 
 function Profile() {
-  const { t } = useLanguage();
   const currentUser = getAdminUser();
 
   const [profile, setProfile] = useState(null);

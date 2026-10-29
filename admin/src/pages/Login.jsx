@@ -26,6 +26,7 @@ function Login() {
       const response = await api.post("/auth/login", {
         email,
         password,
+        portal: "admin",
       });
 
       const user = response.data.data;

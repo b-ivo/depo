@@ -35,6 +35,7 @@ function Login() {
         body: JSON.stringify({
           email,
           password,
+          portal: "client",
         }),
       });
 

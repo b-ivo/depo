@@ -40,7 +40,7 @@ function Businesses() {
     };
 
     load();
-  }, []);
+  }, [t]);
 
   const resetNewBusiness = () => {
     setNewBusiness({ name: "", location: "" });

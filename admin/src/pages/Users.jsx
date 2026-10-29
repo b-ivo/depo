@@ -76,7 +76,7 @@ function Users() {
     };
 
     load();
-  }, [isSuperAdmin]);
+  }, [isSuperAdmin, t]);
 
   const resetNewUser = () => {
     const firstActive = businesses.find((b) => b.active);

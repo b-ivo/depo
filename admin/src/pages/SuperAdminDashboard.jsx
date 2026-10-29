@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import api from "../services/api";
-import { useLanguage } from "../i18n/context.js";
 
 function SuperAdminDashboard() {
-  const { t } = useLanguage();
   const [businesses, setBusinesses] = useState([]);
   const [users, setUsers] = useState([]);
 

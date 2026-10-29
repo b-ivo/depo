@@ -21,18 +21,19 @@ const DUMMY_PASSWORD_HASH = bcrypt.hashSync(
 // ================================
 router.post("/login", loginRateLimit, async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, portal } = req.body;
 
     // Validate input
     if (
       !email ||
       !password ||
       typeof email !== "string" ||
-      typeof password !== "string"
+      typeof password !== "string" ||
+      !["admin", "client"].includes(portal)
     ) {
       return res.status(400).json({
         success: false,
-        message: "Email and password are required.",
+        message: "Email, password, and a valid portal are required.",
       });
     }
 
@@ -107,10 +108,21 @@ router.post("/login", loginRateLimit, async (req, res) => {
       });
     }
 
-    // Role check is handled client-side per portal:
-    // - admin portal (5174) allows admin/superadmin only (admin/src/pages/Login.jsx:31)
-    // - client portal (5173) allows staff only (client/src/pages/Login.jsx:42)
-    // Server issues JWT for any valid credentials; frontend enforces portal access by role.
+    const allowedForPortal =
+      portal === "admin"
+        ? ["admin", "superadmin"].includes(user.role)
+        : user.role === "staff";
+
+    if (!allowedForPortal) {
+      return res.status(403).json({
+        success: false,
+        message:
+          portal === "admin"
+            ? "This account must use the client portal."
+            : "This account must use the admin portal.",
+        code: "WRONG_PORTAL",
+      });
+    }
 
     // ======================================
     // CREATE JWT
